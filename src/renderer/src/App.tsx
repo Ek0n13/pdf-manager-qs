@@ -18,7 +18,7 @@ function App(): JSX.Element {
       <div className="actions">
         <div className="action">
           <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
+            fate skata
           </a>
         </div>
         <div className="action">
