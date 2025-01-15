@@ -3,13 +3,20 @@ import ReactDOM from "react-dom/client";
 import "./assets/base.css";
 import "./assets/main.css";
 
-import { RouterProvider, createRouter } from "@tanstack/react-router";
+import {
+  RouterProvider,
+  createMemoryHistory,
+  createRouter,
+} from "@tanstack/react-router";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 
+const memoryHistory = createMemoryHistory({
+  initialEntries: ["/skata"],
+});
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree, history: memoryHistory });
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

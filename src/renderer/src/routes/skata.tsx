@@ -1,8 +1,8 @@
 import { createFileRoute, Await } from "@tanstack/react-router";
-import Versions from ".././components/Versions";
+import Versions from "../components/Versions";
 import electronLogo from ".././assets/electron.svg";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/skata")({
   component: Index,
   loader: async () => {
     const text = SlowPromise();
