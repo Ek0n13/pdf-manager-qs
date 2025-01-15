@@ -1,11 +1,30 @@
-import Versions from "./components/Versions";
-import electronLogo from "./assets/electron.svg";
+import { createFileRoute, Await } from "@tanstack/react-router";
+import Versions from "../components/Versions";
+import electronLogo from ".././assets/electron.svg";
 
-function App(): JSX.Element {
+export const Route = createFileRoute("/skata")({
+  component: Index,
+  loader: async () => {
+    const text = SlowPromise();
+    return { slowdata: text };
+  },
+});
+
+function Index(): JSX.Element {
+  const { slowdata } = Route.useLoaderData();
+
   const ipcHandle = (): void => window.electron.ipcRenderer.send("ping");
 
   return (
     <>
+      <div className="p-2">
+        <h3>Welcome Home!</h3>
+        <Await promise={slowdata} fallback={<p>loading...</p>}>
+          {(data) => {
+            return <span>{data}</span>;
+          }}
+        </Await>
+      </div>
       <img alt="logo" className="logo" src={electronLogo} />
       <div className="creator">Powered by electron-vite</div>
       <div className="text">
@@ -32,4 +51,10 @@ function App(): JSX.Element {
   );
 }
 
-export default App;
+const SlowPromise = async (): Promise<string> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      return resolve("text");
+    }, 10000);
+  });
+};
