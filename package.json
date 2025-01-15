@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
+  "type": "module",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "scripts": {
@@ -23,12 +24,15 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
+    "@tanstack/react-router": "^1.97.0",
     "electron-updater": "^6.1.7"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@tanstack/router-devtools": "^1.97.0",
+    "@tanstack/router-plugin": "^1.97.0",
     "@types/node": "^20.14.8",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
