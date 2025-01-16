@@ -15,7 +15,7 @@ declare global {
       fileYTSearch: (fileString: string) => void;
       saveLastPlayed: (fileName: string | null, data: string) => void;
 
-      getPdfFile: (path: string) => Promise<String>;
+      getPdfFile: (path: string) => Promise<string>;
     };
   }
 }
