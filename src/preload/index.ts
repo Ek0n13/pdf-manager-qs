@@ -20,6 +20,8 @@ const api = {
     ipcRenderer.invoke("read-text-file", filePath),
   saveLastPlayed: (fileName: string | null, data: string) =>
     ipcRenderer.send("save-last-played", fileName, data),
+
+  getPdfFile: (path: string) => ipcRenderer.invoke("get-pdf-file", path),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

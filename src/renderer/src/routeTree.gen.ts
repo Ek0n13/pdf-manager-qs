@@ -8,10 +8,17 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SkataImport } from './routes/skata'
+import { Route as ViewpdfPathImport } from './routes/viewpdf.$path'
+
+// Create Virtual Routes
+
+const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
 
@@ -21,15 +28,41 @@ const SkataRoute = SkataImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const IndexLazyRoute = IndexLazyImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const ViewpdfPathRoute = ViewpdfPathImport.update({
+  id: '/viewpdf/$path',
+  path: '/viewpdf/$path',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/skata': {
       id: '/skata'
       path: '/skata'
       fullPath: '/skata'
       preLoaderRoute: typeof SkataImport
+      parentRoute: typeof rootRoute
+    }
+    '/viewpdf/$path': {
+      id: '/viewpdf/$path'
+      path: '/viewpdf/$path'
+      fullPath: '/viewpdf/$path'
+      preLoaderRoute: typeof ViewpdfPathImport
       parentRoute: typeof rootRoute
     }
   }
@@ -38,33 +71,43 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexLazyRoute
   '/skata': typeof SkataRoute
+  '/viewpdf/$path': typeof ViewpdfPathRoute
 }
 
 export interface FileRoutesByTo {
+  '/': typeof IndexLazyRoute
   '/skata': typeof SkataRoute
+  '/viewpdf/$path': typeof ViewpdfPathRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/': typeof IndexLazyRoute
   '/skata': typeof SkataRoute
+  '/viewpdf/$path': typeof ViewpdfPathRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/skata'
+  fullPaths: '/' | '/skata' | '/viewpdf/$path'
   fileRoutesByTo: FileRoutesByTo
-  to: '/skata'
-  id: '__root__' | '/skata'
+  to: '/' | '/skata' | '/viewpdf/$path'
+  id: '__root__' | '/' | '/skata' | '/viewpdf/$path'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
+  IndexLazyRoute: typeof IndexLazyRoute
   SkataRoute: typeof SkataRoute
+  ViewpdfPathRoute: typeof ViewpdfPathRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexLazyRoute: IndexLazyRoute,
   SkataRoute: SkataRoute,
+  ViewpdfPathRoute: ViewpdfPathRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +120,19 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/skata"
+        "/",
+        "/skata",
+        "/viewpdf/$path"
       ]
+    },
+    "/": {
+      "filePath": "index.lazy.tsx"
     },
     "/skata": {
       "filePath": "skata.tsx"
+    },
+    "/viewpdf/$path": {
+      "filePath": "viewpdf.$path.tsx"
     }
   }
 }

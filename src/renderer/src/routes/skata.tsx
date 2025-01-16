@@ -3,14 +3,14 @@ import Versions from "../components/Versions";
 import electronLogo from ".././assets/electron.svg";
 
 export const Route = createFileRoute("/skata")({
-  component: Index,
+  component: Idex,
   loader: async () => {
     const text = SlowPromise();
     return { slowdata: text };
   },
 });
 
-function Index(): JSX.Element {
+function Idex(): JSX.Element {
   const { slowdata } = Route.useLoaderData();
 
   const ipcHandle = (): void => window.electron.ipcRenderer.send("ping");

@@ -71,8 +71,7 @@ app.whenReady().then(() => {
 
       return dialogResult[0];
     } catch (error) {
-      console.error("Error reading directory:", error);
-      return null;
+      throw new Error("Error reading directory: " + error);
     }
   });
 
@@ -81,8 +80,7 @@ app.whenReady().then(() => {
       const files = fs.readdirSync(directory);
       return files.filter((file) => file.endsWith(".pdf"));
     } catch (error) {
-      console.error("Error reading directory:", error);
-      return null;
+      throw new Error("Error reading directory:" + error);
     }
   });
 
@@ -96,8 +94,7 @@ app.whenReady().then(() => {
 
       return childDirs;
     } catch (error) {
-      console.error("Error finding child directories:", error);
-      return null;
+      throw new Error("Error finding child directories:" + error);
     }
   });
 
@@ -106,7 +103,9 @@ app.whenReady().then(() => {
     shell
       .openPath(fullPath)
       // .then(() => console.log('File opened'))
-      .catch((err) => console.error("Error opening file:", err));
+      .catch((err) => {
+        throw new Error("Error opening file:" + err);
+      });
   });
 
   ipcMain.on("file-yt-search", (_event, fileString: string) => {
@@ -128,7 +127,7 @@ app.whenReady().then(() => {
     try {
       return pathJoin(...paths);
     } catch (error) {
-      console.error("Error joining paths:", error);
+      throw new Error("Error joining paths: " + error);
       return null;
     }
   });
@@ -150,8 +149,7 @@ app.whenReady().then(() => {
 
       return fs.readFileSync(file, "utf-8");
     } catch (error) {
-      console.error("Error reading file:", error);
-      return null;
+      throw new Error("Error reading file: " + error);
     }
   });
 
@@ -175,10 +173,19 @@ app.whenReady().then(() => {
           fs.writeFileSync(file, data);
         }
       } catch (error) {
-        console.error("Error saving last played:", error);
+        throw new Error("Error saving last played: " + error);
       }
     },
   );
+
+  ipcMain.handle("get-pdf-file", async (_event, path) => {
+    try {
+      const buffer = fs.readFileSync(path);
+      return buffer.toString("base64");
+    } catch (error) {
+      throw new Error("Error getting pdf file: " + error);
+    }
+  });
 
   createWindow();
 

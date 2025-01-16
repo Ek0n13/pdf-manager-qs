@@ -26,9 +26,3 @@ function App() {
 }
 
 export default App;
-
-/*
-pnpm remove @fortawesome/free-solid-svg-icons
-pnpm remove @fortawesome/free-regular-svg-icons
-pnpm remove @fortawesome/free-brands-svg-icons
-*/

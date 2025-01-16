@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 
 function RightParent(props: {
@@ -78,14 +79,14 @@ function PdfsList(props: {
     setDisplayPdfList(filteredPdfList);
   };
 
-  const handleOpenFile = (
-    event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
-    fileName: string,
-  ) => {
-    event.preventDefault();
+  // const handleOpenFile = (
+  //   event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
+  //   fileName: string,
+  // ) => {
+  //   event.preventDefault();
 
-    window.api.openFile(fileName, props.activeDirectory!);
-  };
+  //   window.api.openFile(fileName, props.activeDirectory!);
+  // };
 
   const handleYTSearch = (
     event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
@@ -132,13 +133,20 @@ function PdfsList(props: {
               >
                 <i className="far fa-floppy-disk" />
               </a>
-              <a
+              <Link
+                to="/viewpdf/$path"
+                params={{ path: props.activeDirectory + "\\" + value }}
+                className="mr-4"
+              >
+                <i className="far fa-file-pdf" />
+              </Link>
+              {/* <a
                 href="#"
                 className="mr-4"
                 onClick={(event) => handleOpenFile(event, value)}
               >
                 <i className="far fa-file-pdf" />
-              </a>
+              </a> */}
               <a href="#" onClick={(event) => handleYTSearch(event, value)}>
                 <i className="fa fa-magnifying-glass" />
               </a>
