@@ -12,7 +12,7 @@ import {
 import { routeTree } from "./routeTree.gen";
 
 const memoryHistory = createMemoryHistory({
-  initialEntries: ["/skata"],
+  initialEntries: ["/"],
 });
 // Create a new router instance
 const router = createRouter({ routeTree, history: memoryHistory });
