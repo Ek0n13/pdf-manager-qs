@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+// import { Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 
 function RightParent(props: {
@@ -20,6 +20,14 @@ function RightParent(props: {
 
     const element = document.getElementById("item-" + listItemIndex);
     element?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    setTimeout(() => {
+      element?.classList.add("highlight");
+    }, 250);
+
+    setTimeout(() => {
+      element?.classList.remove("highlight");
+    }, 2000);
   };
 
   const handleReadTextFile = async (
@@ -79,14 +87,14 @@ function PdfsList(props: {
     setDisplayPdfList(filteredPdfList);
   };
 
-  // const handleOpenFile = (
-  //   event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
-  //   fileName: string,
-  // ) => {
-  //   event.preventDefault();
+  const handleOpenFile = (
+    event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
+    fileName: string,
+  ) => {
+    event.preventDefault();
 
-  //   window.api.openFile(fileName, props.activeDirectory!);
-  // };
+    window.api.openFile(fileName, props.activeDirectory!);
+  };
 
   const handleYTSearch = (
     event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
@@ -122,32 +130,39 @@ function PdfsList(props: {
           <li
             id={"item-" + index}
             key={"open-" + index}
-            className="mx-4 px-2 flex justify-between items-center text-black"
+            className="mx-4 px-2 flex justify-between items-center text-black rounded-sm highlightable"
           >
             <span className="overflow-ellipsis overflow-x-hidden">{value}</span>
             <div className="pl-10 my-1 flex">
               <a
                 href="#"
                 className="mr-4"
+                title="Save Last Played"
                 onClick={(event) => handleSaveLastPlayed(event, null, value)}
               >
                 <i className="far fa-floppy-disk" />
               </a>
-              <Link
-                to="/viewpdf/$path"
+              {/* <Link
+                to="/$path"
+                replace
                 params={{ path: props.activeDirectory + "\\" + value }}
                 className="mr-4"
               >
                 <i className="far fa-file-pdf" />
-              </Link>
-              {/* <a
+              </Link> */}
+              <a
                 href="#"
                 className="mr-4"
+                title="Open PDF"
                 onClick={(event) => handleOpenFile(event, value)}
               >
                 <i className="far fa-file-pdf" />
-              </a> */}
-              <a href="#" onClick={(event) => handleYTSearch(event, value)}>
+              </a>
+              <a
+                href="#"
+                title="Search on YT"
+                onClick={(event) => handleYTSearch(event, value)}
+              >
                 <i className="fa fa-magnifying-glass" />
               </a>
             </div>

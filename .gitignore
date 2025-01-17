@@ -5,3 +5,4 @@ out
 *.log*
 .env
 resources/last-played
+backup

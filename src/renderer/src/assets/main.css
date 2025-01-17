@@ -65,3 +65,11 @@
 #main-container input[type="search"]::-webkit-search-cancel-button {
   cursor: pointer;
 }
+
+.highlightable {
+  transition: background-color 1s ease;
+}
+
+.highlightable.highlight {
+  background-color: white;
+}

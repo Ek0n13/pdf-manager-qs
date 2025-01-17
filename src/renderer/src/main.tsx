@@ -15,7 +15,11 @@ const memoryHistory = createMemoryHistory({
   initialEntries: ["/"],
 });
 // Create a new router instance
-const router = createRouter({ routeTree, history: memoryHistory });
+const router = createRouter({
+  routeTree,
+  history: memoryHistory,
+  defaultPreload: "intent",
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
