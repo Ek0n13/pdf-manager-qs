@@ -112,7 +112,7 @@ function DirectoriesList(props: {
 
   return (
     <div>
-      <ul className="divide-y text-black max-h-[78vh] overflow-y-auto">
+      <ul className="divide-y divide-black text-black max-h-[78vh] overflow-y-auto">
         {props.childrenDirectories.map((value, index) => (
           <li
             key={index}

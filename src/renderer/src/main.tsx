@@ -18,7 +18,6 @@ const memoryHistory = createMemoryHistory({
 const router = createRouter({
   routeTree,
   history: memoryHistory,
-  defaultPreload: "intent",
 });
 
 // Register the router instance for type safety

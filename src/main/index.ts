@@ -5,7 +5,7 @@ import { join as pathJoin, parse as pathParse } from "path";
 import { exec } from "child_process";
 import * as fs from "fs";
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const cWidth: number = Math.ceil(width * 0.9);
   const cHeight: number = Math.ceil(height * 0.9);
@@ -37,10 +37,47 @@ function createWindow(): void {
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-    mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+    mainWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}`);
   } else {
-    mainWindow.loadFile(pathJoin(__dirname, "../renderer/index.html"));
+    mainWindow.loadFile(pathJoin(__dirname, `../renderer/index.html`));
   }
+
+  return mainWindow;
+}
+
+function createWindowModal(route: string, parent: BrowserWindow): void {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const cWidth: number = Math.ceil(width * 0.8);
+  const cHeight: number = Math.ceil(height * 0.8);
+
+  // Create the browser window.
+  let modalWindow: BrowserWindow | null = new BrowserWindow({
+    width: cWidth,
+    height: cHeight,
+    parent: parent,
+    modal: true,
+    show: false,
+    autoHideMenuBar: true,
+    ...(process.platform === "linux" ? { icon } : {}),
+    webPreferences: {
+      preload: pathJoin(__dirname, "../preload/index.mjs"),
+      sandbox: false,
+    },
+  });
+
+  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+    modalWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}${"" + route}`);
+  } else {
+    modalWindow.loadFile(pathJoin(__dirname, `../renderer/index.html${"#" + route}`));
+  }
+
+  modalWindow.once("ready-to-show", () => {
+    modalWindow!.show();
+  });
+
+  modalWindow.on("closed", () => {
+    modalWindow = null;
+  })
 }
 
 // This method will be called when Electron has finished
@@ -56,6 +93,8 @@ app.whenReady().then(() => {
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
+
+  const mainWindow = createWindow();
 
   ipcMain.handle("directory-dialog", async (_event) => {
     try {
@@ -102,9 +141,12 @@ app.whenReady().then(() => {
 
   ipcMain.on("open-file", (_event, fileName: string, directory: string) => {
     const fullPath = pathJoin(directory, fileName);
+    
+    // const encodedPath = encodeURIComponent(fullPath);
+    // createWindowModal(`view?path=${encodedPath}`, mainWindow);
+
     shell
       .openPath(fullPath)
-      // .then(() => console.log('File opened'))
       .catch((err) => {
         throw new Error("Error opening file:" + err);
       });
@@ -130,7 +172,6 @@ app.whenReady().then(() => {
       return pathJoin(...paths);
     } catch (error) {
       throw new Error("Error joining paths: " + error);
-      return null;
     }
   });
 
@@ -188,8 +229,6 @@ app.whenReady().then(() => {
       throw new Error("Error getting pdf file: " + error);
     }
   });
-
-  createWindow();
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the

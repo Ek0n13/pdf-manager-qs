@@ -1,4 +1,4 @@
-// import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 
 function RightParent(props: {
@@ -125,7 +125,7 @@ function PdfsList(props: {
         placeholder="Search..."
         onInput={(event) => liveSearch(event.currentTarget.value)}
       />
-      <ul className="divide-y text-black max-h-[81vh] overflow-y-auto">
+      <ul className="divide-y divide-black text-black max-h-[81vh] overflow-y-auto">
         {displayPdfList.map((value, index) => (
           <li
             id={"item-" + index}
@@ -143,15 +143,14 @@ function PdfsList(props: {
                 <i className="far fa-floppy-disk" />
               </a>
               {/* <Link
-                to="/$path"
-                replace
+                to="/view/$path/modal"
                 params={{ path: props.activeDirectory + "\\" + value }}
                 className="mr-4"
               >
                 <i className="far fa-file-pdf" />
               </Link> */}
               <a
-                href="#"
+                href={`/view?path=${value}`}
                 className="mr-4"
                 title="Open PDF"
                 onClick={(event) => handleOpenFile(event, value)}
