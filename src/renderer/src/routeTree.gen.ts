@@ -8,17 +8,12 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SkataImport } from './routes/skata'
-import { Route as ViewPathModalImport } from './routes/view.$path.modal'
-
-// Create Virtual Routes
-
-const IndexLazyImport = createFileRoute('/')()
+import { Route as IndexImport } from './routes/index'
+import { Route as ViewPathImport } from './routes/view.$path'
 
 // Create/Update Routes
 
@@ -28,15 +23,15 @@ const SkataRoute = SkataImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexLazyRoute = IndexLazyImport.update({
+const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+} as any)
 
-const ViewPathModalRoute = ViewPathModalImport.update({
-  id: '/view/$path/modal',
-  path: '/view/$path/modal',
+const ViewPathRoute = ViewPathImport.update({
+  id: '/view/$path',
+  path: '/view/$path',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -48,7 +43,7 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexLazyImport
+      preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
     '/skata': {
@@ -58,11 +53,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkataImport
       parentRoute: typeof rootRoute
     }
-    '/view/$path/modal': {
-      id: '/view/$path/modal'
-      path: '/view/$path/modal'
-      fullPath: '/view/$path/modal'
-      preLoaderRoute: typeof ViewPathModalImport
+    '/view/$path': {
+      id: '/view/$path'
+      path: '/view/$path'
+      fullPath: '/view/$path'
+      preLoaderRoute: typeof ViewPathImport
       parentRoute: typeof rootRoute
     }
   }
@@ -71,43 +66,43 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexLazyRoute
+  '/': typeof IndexRoute
   '/skata': typeof SkataRoute
-  '/view/$path/modal': typeof ViewPathModalRoute
+  '/view/$path': typeof ViewPathRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexLazyRoute
+  '/': typeof IndexRoute
   '/skata': typeof SkataRoute
-  '/view/$path/modal': typeof ViewPathModalRoute
+  '/view/$path': typeof ViewPathRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexLazyRoute
+  '/': typeof IndexRoute
   '/skata': typeof SkataRoute
-  '/view/$path/modal': typeof ViewPathModalRoute
+  '/view/$path': typeof ViewPathRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/skata' | '/view/$path/modal'
+  fullPaths: '/' | '/skata' | '/view/$path'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/skata' | '/view/$path/modal'
-  id: '__root__' | '/' | '/skata' | '/view/$path/modal'
+  to: '/' | '/skata' | '/view/$path'
+  id: '__root__' | '/' | '/skata' | '/view/$path'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexLazyRoute: typeof IndexLazyRoute
+  IndexRoute: typeof IndexRoute
   SkataRoute: typeof SkataRoute
-  ViewPathModalRoute: typeof ViewPathModalRoute
+  ViewPathRoute: typeof ViewPathRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexLazyRoute: IndexLazyRoute,
+  IndexRoute: IndexRoute,
   SkataRoute: SkataRoute,
-  ViewPathModalRoute: ViewPathModalRoute,
+  ViewPathRoute: ViewPathRoute,
 }
 
 export const routeTree = rootRoute
@@ -122,17 +117,17 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/skata",
-        "/view/$path/modal"
+        "/view/$path"
       ]
     },
     "/": {
-      "filePath": "index.lazy.tsx"
+      "filePath": "index.tsx"
     },
     "/skata": {
       "filePath": "skata.tsx"
     },
-    "/view/$path/modal": {
-      "filePath": "view.$path.modal.tsx"
+    "/view/$path": {
+      "filePath": "view.$path.tsx"
     }
   }
 }

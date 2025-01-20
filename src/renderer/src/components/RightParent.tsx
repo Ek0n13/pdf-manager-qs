@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+// import { Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 
 function RightParent(props: {
@@ -143,14 +143,15 @@ function PdfsList(props: {
                 <i className="far fa-floppy-disk" />
               </a>
               {/* <Link
-                to="/view/$path/modal"
+                to="/view/$path"
                 params={{ path: props.activeDirectory + "\\" + value }}
+                replace
                 className="mr-4"
               >
                 <i className="far fa-file-pdf" />
               </Link> */}
               <a
-                href={`/view?path=${value}`}
+                href={`#`}
                 className="mr-4"
                 title="Open PDF"
                 onClick={(event) => handleOpenFile(event, value)}

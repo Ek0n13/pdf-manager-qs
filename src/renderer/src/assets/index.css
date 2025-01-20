@@ -23,6 +23,7 @@ a {
   text-decoration: inherit;
   /* text-shadow: 1px 1px 0px black; */
 }
+
 a:hover {
   color: hsl(237, 80%, 60%);
 }
@@ -51,15 +52,17 @@ button {
   /* font-weight: 500; */
   /* transition: border-color 0.25s; */
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     background-color: #ffffff;
   }

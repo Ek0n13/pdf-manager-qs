@@ -39,7 +39,10 @@ function createWindow(): BrowserWindow {
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     mainWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}`);
   } else {
-    mainWindow.loadFile(pathJoin(__dirname, `../renderer/index.html`));
+    // mainWindow.loadFile(pathJoin(__dirname, `../renderer/index.html`));
+    mainWindow.loadURL(
+      `file://${pathJoin(__dirname, `../renderer/index.html`)}`,
+    );
   }
 
   return mainWindow;
@@ -65,19 +68,30 @@ function createWindowModal(route: string, parent: BrowserWindow): void {
     },
   });
 
-  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-    modalWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}${"" + route}`);
-  } else {
-    modalWindow.loadFile(pathJoin(__dirname, `../renderer/index.html${"#" + route}`));
-  }
-
   modalWindow.once("ready-to-show", () => {
     modalWindow!.show();
   });
 
   modalWindow.on("closed", () => {
     modalWindow = null;
-  })
+  });
+
+  console.log(route);
+
+  // if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+  //   // console.log("loadUrl:", `${process.env["ELECTRON_RENDERER_URL"]}${"#/" + route}`)
+  //   modalWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}${route}`);
+  // } else {
+  //   const indexUrl = `${pathJoin(__dirname, `../renderer/index.html`)}`;
+  //   const formattedUrl = url.format({
+  //     pathname: indexUrl,
+  //     hash: route,
+  //     protocol: "file:",
+  //     slashes: true,
+  //   })
+
+  //   modalWindow.loadURL(formattedUrl);
+  // }
 }
 
 // This method will be called when Electron has finished
@@ -95,6 +109,12 @@ app.whenReady().then(() => {
   });
 
   const mainWindow = createWindow();
+
+  app.on("activate", function () {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 
   ipcMain.handle("directory-dialog", async (_event) => {
     try {
@@ -141,15 +161,17 @@ app.whenReady().then(() => {
 
   ipcMain.on("open-file", (_event, fileName: string, directory: string) => {
     const fullPath = pathJoin(directory, fileName);
-    
-    // const encodedPath = encodeURIComponent(fullPath);
-    // createWindowModal(`view?path=${encodedPath}`, mainWindow);
 
-    shell
-      .openPath(fullPath)
-      .catch((err) => {
-        throw new Error("Error opening file:" + err);
-      });
+    const encodedPath = encodeURIComponent(fullPath);
+    console.log(encodedPath);
+    // createWindowModal(`/view/${encodedPath}`, mainWindow);
+    createWindowModal(`/skata`, mainWindow);
+
+    // shell
+    //   .openPath(fullPath)
+    //   .catch((err) => {
+    //     throw new Error("Error opening file:" + err);
+    //   });
   });
 
   ipcMain.on("file-yt-search", (_event, fileString: string) => {
@@ -228,12 +250,6 @@ app.whenReady().then(() => {
     } catch (error) {
       throw new Error("Error getting pdf file: " + error);
     }
-  });
-
-  app.on("activate", function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
