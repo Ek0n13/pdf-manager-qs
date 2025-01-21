@@ -65,6 +65,23 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 
+  ipcMain.handle("join-paths", async (_event, ...paths: string[]) => {
+    try {
+      return pathJoin(...paths);
+    } catch (error) {
+      throw new Error("Error joining paths: " + error);
+    }
+  });
+
+  ipcMain.handle("read-directory", async (_event, directory: string) => {
+    try {
+      const files = fs.readdirSync(directory);
+      return files.filter((file) => file.endsWith(".pdf"));
+    } catch (error) {
+      throw new Error("Error reading directory:" + error);
+    }
+  });
+
   ipcMain.handle("directory-dialog", async (_event) => {
     try {
       const dialogResult = dialog.showOpenDialogSync({
@@ -82,15 +99,6 @@ app.whenReady().then(() => {
       return dialogResult[0];
     } catch (error) {
       throw new Error("Error reading directory: " + error);
-    }
-  });
-
-  ipcMain.handle("read-directory", async (_event, directory: string) => {
-    try {
-      const files = fs.readdirSync(directory);
-      return files.filter((file) => file.endsWith(".pdf"));
-    } catch (error) {
-      throw new Error("Error reading directory:" + error);
     }
   });
 
@@ -116,8 +124,58 @@ app.whenReady().then(() => {
     });
   });
 
-  ipcMain.on("file-yt-search", (_event, fileString: string) => {
-    const strippedFileName = pathParse(fileString).name.trim();
+  ipcMain.handle(
+    "delete-file",
+    (_event, fileName: string, directory: string) => {
+      const fullPath = pathJoin(directory, fileName);
+
+      const fileExists = fs.existsSync(fullPath);
+      const isFile = fs.statSync(fullPath).isFile();
+
+      if (!fileExists) {
+        dialog.showMessageBoxSync({
+          message: "File does not exist.",
+
+          type: "warning",
+          title: "Warning!",
+        });
+
+        return false;
+      }
+
+      if (!isFile) {
+        dialog.showMessageBoxSync({
+          message: "Path is not a file.",
+
+          type: "warning",
+          title: "Warning!",
+        });
+
+        return false;
+      }
+
+      const result = dialog.showMessageBoxSync({
+        message: `Delete file: "${fileName}"?`,
+
+        type: "warning",
+        buttons: ["Yes", "No"],
+        defaultId: 0,
+        cancelId: 1,
+        title: "Delete",
+      });
+
+      if (result === 0) {
+        // fs.rmSync(fullPath);
+        shell.trashItem(fullPath);
+        return true;
+      }
+
+      return false;
+    },
+  );
+
+  ipcMain.on("file-yt-search", (_event, fileName: string) => {
+    const strippedFileName = pathParse(fileName).name.trim();
 
     const searchString = strippedFileName
       .replace(/&/g, "%26")
@@ -129,14 +187,6 @@ app.whenReady().then(() => {
     const finalUrl = `https://www.youtube.com/results?search_query=${searchString}+hq`;
 
     openInEdge(finalUrl);
-  });
-
-  ipcMain.handle("join-paths", async (_event, ...paths: string[]) => {
-    try {
-      return pathJoin(...paths);
-    } catch (error) {
-      throw new Error("Error joining paths: " + error);
-    }
   });
 
   ipcMain.handle("read-text-file", async (_event, filePath: string | null) => {

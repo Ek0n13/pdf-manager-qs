@@ -13,8 +13,10 @@ const api = {
 
   openFile: (fileName: string, directory: string) =>
     ipcRenderer.send("open-file", fileName, directory),
-  fileYTSearch: (fileString: string) =>
-    ipcRenderer.send("file-yt-search", fileString),
+  deleteFile: (fileName: string, directory: string) =>
+    ipcRenderer.invoke("delete-file", fileName, directory),
+  fileYTSearch: (fileName: string) =>
+    ipcRenderer.send("file-yt-search", fileName),
 
   readTextFile: (filePath: string | null) =>
     ipcRenderer.invoke("read-text-file", filePath),

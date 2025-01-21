@@ -93,22 +93,13 @@ function PdfsList() {
     }
 
     const filteredPdfList = snapshotPdfList.current.filter((item) =>
-      item.toLowerCase().includes(inputValue.toLowerCase()),
+      item.toLowerCase().includes(inputValue.toLowerCase())
     );
     setDisplayPdfList(filteredPdfList);
   };
 
-  const handleYTSearch = (
-    event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
-    fileString: string,
-  ) => {
-    event.preventDefault();
-
-    window.api.fileYTSearch(fileString);
-  };
-
   const handleSaveLastPlayed = (
-    event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
+    event: React.MouseEvent<HTMLAnchorElement>,
     fileName: string | null,
     data: string,
   ) => {
@@ -117,8 +108,38 @@ function PdfsList() {
     window.api.saveLastPlayed(fileName, data);
   };
 
-  const handleSaveLastViewed = (fileName: string | null) => {
+  // const handleYTSearch = (
+  //   event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
+  //   fileName: string,
+  // ) => {
+  //   event.preventDefault();
+
+  //   window.api.fileYTSearch(fileName);
+  // };
+
+  const handleDeleteFile = async (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    fileName: string,
+  ) => {
+    event.preventDefault();
+    
+    const fileDeleted = await window.api.deleteFile(fileName, activeDirectory!);
+    
+    if (fileDeleted) {
+      const filteredPdfList = snapshotPdfList.current.filter((item) => {
+        return item.toLocaleLowerCase() !== fileName.toLocaleLowerCase();
+      }
+      );
+      setDisplayPdfList(filteredPdfList);
+    }
+  }
+
+  const openPdfOnClick = (fileName: string | null) => {
     setLastViewed(fileName);
+
+    setTimeout(() => {
+      window.api.fileYTSearch(fileName!)
+    }, 1000);
   };
 
   return (
@@ -140,28 +161,36 @@ function PdfsList() {
           >
             <span className="overflow-ellipsis overflow-x-hidden">{value}</span>
             <div className="pl-10 my-1 flex">
+              <Link
+                to="/view/$path"
+                params={{ path: activeDirectory + "\\" + value }}
+                className="mr-4"
+                title="Open PDF"
+                onClick={() => openPdfOnClick(value)}
+              >
+                <i className="fas fa-file-pdf" />
+              </Link>
               <a
                 href="#"
                 className="mr-4"
                 title="Save Last Played"
                 onClick={(event) => handleSaveLastPlayed(event, null, value)}
               >
-                <i className="far fa-floppy-disk" />
+                <i className="fas fa-floppy-disk" />
               </a>
-              <Link
-                to="/view/$path"
-                params={{ path: activeDirectory + "\\" + value }}
-                className="mr-4"
-                onClick={() => handleSaveLastViewed(value)}
-              >
-                <i className="far fa-file-pdf" />
-              </Link>
-              <a
+              {/* <a
                 href="#"
                 title="Search on YT"
                 onClick={(event) => handleYTSearch(event, value)}
               >
                 <i className="fa fa-magnifying-glass" />
+              </a> */}
+              <a
+                href="#"
+                title="Delete File"
+                onClick={(event) => handleDeleteFile(event, value)}
+              >
+                <i className="fas fa-trash" />
               </a>
             </div>
           </li>

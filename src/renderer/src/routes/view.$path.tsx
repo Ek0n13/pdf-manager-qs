@@ -22,22 +22,27 @@ async function getPdfSlow(path: string) {
 }
 
 function ViewPdf(): JSX.Element {
-  const { pdfUrl } = Route.useLoaderData()
+  const { pdfUrl } = Route.useLoaderData();
 
   return (
     <div className="w-full h-screen">
-      <Link
-        to="/"
-        className="absolute top- left-0 px-2 bg-white rounded-sm text-black "
+      <div
+        className="px-2 py-1 absolute top-[10%] left-0 bg-white rounded-sm"
       >
-        <i className="fas fa-square-caret-left text-2xl py-1" />
-      </Link>
+        <Link
+          to="/"
+          className="text-black"
+          title="Go Back"
+        >
+          <i className="fas fa-square-caret-left text-2xl" />
+        </Link>
+      </div>
       <Await promise={pdfUrl} fallback="loading...">
         {(data) => {
           return (
             <iframe
               src={data}
-              className="pl-6 w-full h-screen"
+              className="w-full h-screen"
             // style={{ width: "100%", height: "100%" }}
             ></iframe>
           )

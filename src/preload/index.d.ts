@@ -12,7 +12,8 @@ declare global {
       getChildDirectories: (directory: string) => Promise<string[]>;
 
       openFile: (filePath: string, directory: string) => void;
-      fileYTSearch: (fileString: string) => void;
+      deleteFile: (fileName: string, directory: string) => Promise<boolean>;
+      fileYTSearch: (fileName: string) => void;
       saveLastPlayed: (fileName: string | null, data: string) => void;
 
       getPdfFile: (path: string) => Promise<string>;
