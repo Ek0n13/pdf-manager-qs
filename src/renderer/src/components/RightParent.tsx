@@ -1,25 +1,28 @@
-// import { Link } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { useRef, useEffect, useContext } from "react";
+import { AppContext } from "@renderer/contexts/AppContext";
 
-function RightParent(props: {
-  className: string;
-  activeDirectory: string | null;
-  pdfList: string[];
-}): JSX.Element {
-  const [lastPlayed, setLastPlayed] = useState<string | null>(null);
+function RightParent(props: { className: string; }): JSX.Element {
+  const {
+    activeDirectory, pdfsList,
+    lastPlayed, setLastPlayed,
+    lastViewed,
+  } = useContext(AppContext);
 
-  const scrollTo = (
-    event: React.MouseEvent<HTMLAnchorElement>,
-    fileName: string,
-  ) => {
-    event.preventDefault();
+  useEffect(() => {
+    scrollToElement(lastViewed!);
+  }, [lastViewed]);
 
-    const listItemIndex = props.pdfList.findIndex((item) => item === fileName);
+  const scrollToElement = (fileName: string, smooth: boolean = false) => {
+    const listItemIndex = pdfsList.findIndex((item) => item === fileName);
 
     if (listItemIndex < 0) return;
 
     const element = document.getElementById("item-" + listItemIndex);
-    element?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (smooth)
+      element?.scrollIntoView({ behavior: "smooth", block: "start" });
+    else
+      element?.scrollIntoView();
 
     setTimeout(() => {
       element?.classList.add("highlight");
@@ -28,6 +31,15 @@ function RightParent(props: {
     setTimeout(() => {
       element?.classList.remove("highlight");
     }, 2000);
+  };
+
+  const scrollTo = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    fileName: string,
+  ) => {
+    event.preventDefault();
+
+    scrollToElement(fileName, true);
   };
 
   const handleReadTextFile = async (
@@ -41,9 +53,9 @@ function RightParent(props: {
 
   return (
     <div id="pdfs-list" className={props.className}>
-      <div className={props.activeDirectory ? "" : " hidden"}>
+      <div className={activeDirectory ? "" : " hidden"}>
         <pre className="px-6 text-center overflow-ellipsis overflow-x-hidden">
-          <span className="whitespace-nowrap ">{props.activeDirectory}</span>
+          <span className="whitespace-nowrap ">{activeDirectory}</span>
           <br />
           Latest:{" "}
           <a href="#" onClick={(event) => scrollTo(event, lastPlayed!)}>
@@ -54,26 +66,25 @@ function RightParent(props: {
             <i className="fas fa-download" />
           </a>
         </pre>
-        <PdfsList
-          activeDirectory={props.activeDirectory}
-          pdfList={props.pdfList}
-        />
+        <PdfsList />
       </div>
     </div>
   );
 }
 
-function PdfsList(props: {
-  activeDirectory: string | null;
-  pdfList: string[];
-}) {
-  const [displayPdfList, setDisplayPdfList] = useState<string[]>([]);
+function PdfsList() {
+  const {
+    activeDirectory, pdfsList,
+    displayPdfList, setDisplayPdfList,
+    setLastViewed,
+  } = useContext(AppContext);
+
   const snapshotPdfList = useRef<string[]>([]);
 
   useEffect(() => {
-    snapshotPdfList.current = props.pdfList;
-    setDisplayPdfList(props.pdfList);
-  }, [props.pdfList]);
+    snapshotPdfList.current = pdfsList;
+    setDisplayPdfList(pdfsList);
+  }, [pdfsList]);
 
   const liveSearch = (inputValue: string) => {
     if (inputValue === "" || inputValue === null) {
@@ -85,15 +96,6 @@ function PdfsList(props: {
       item.toLowerCase().includes(inputValue.toLowerCase()),
     );
     setDisplayPdfList(filteredPdfList);
-  };
-
-  const handleOpenFile = (
-    event: React.MouseEvent<HTMLInputElement | HTMLAnchorElement>,
-    fileName: string,
-  ) => {
-    event.preventDefault();
-
-    window.api.openFile(fileName, props.activeDirectory!);
   };
 
   const handleYTSearch = (
@@ -115,10 +117,14 @@ function PdfsList(props: {
     window.api.saveLastPlayed(fileName, data);
   };
 
+  const handleSaveLastViewed = (fileName: string | null) => {
+    setLastViewed(fileName);
+  };
+
   return (
     <div
       id="pdf-list-search"
-      className={props.pdfList.length === 0 ? "hidden" : ""}
+      className={pdfsList.length === 0 ? "hidden" : ""}
     >
       <input
         type="search"
@@ -142,22 +148,14 @@ function PdfsList(props: {
               >
                 <i className="far fa-floppy-disk" />
               </a>
-              {/* <Link
+              <Link
                 to="/view/$path"
-                params={{ path: props.activeDirectory + "\\" + value }}
-                replace
+                params={{ path: activeDirectory + "\\" + value }}
                 className="mr-4"
+                onClick={() => handleSaveLastViewed(value)}
               >
                 <i className="far fa-file-pdf" />
-              </Link> */}
-              <a
-                href={`#`}
-                className="mr-4"
-                title="Open PDF"
-                onClick={(event) => handleOpenFile(event, value)}
-              >
-                <i className="far fa-file-pdf" />
-              </a>
+              </Link>
               <a
                 href="#"
                 title="Search on YT"

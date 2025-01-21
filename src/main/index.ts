@@ -5,7 +5,7 @@ import { join as pathJoin, parse as pathParse } from "path";
 import { exec } from "child_process";
 import * as fs from "fs";
 
-function createWindow(): BrowserWindow {
+function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const cWidth: number = Math.ceil(width * 0.9);
   const cHeight: number = Math.ceil(height * 0.9);
@@ -39,59 +39,8 @@ function createWindow(): BrowserWindow {
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     mainWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}`);
   } else {
-    // mainWindow.loadFile(pathJoin(__dirname, `../renderer/index.html`));
-    mainWindow.loadURL(
-      `file://${pathJoin(__dirname, `../renderer/index.html`)}`,
-    );
+    mainWindow.loadFile(pathJoin(__dirname, `../renderer/index.html`));
   }
-
-  return mainWindow;
-}
-
-function createWindowModal(route: string, parent: BrowserWindow): void {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const cWidth: number = Math.ceil(width * 0.8);
-  const cHeight: number = Math.ceil(height * 0.8);
-
-  // Create the browser window.
-  let modalWindow: BrowserWindow | null = new BrowserWindow({
-    width: cWidth,
-    height: cHeight,
-    parent: parent,
-    modal: true,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === "linux" ? { icon } : {}),
-    webPreferences: {
-      preload: pathJoin(__dirname, "../preload/index.mjs"),
-      sandbox: false,
-    },
-  });
-
-  modalWindow.once("ready-to-show", () => {
-    modalWindow!.show();
-  });
-
-  modalWindow.on("closed", () => {
-    modalWindow = null;
-  });
-
-  console.log(route);
-
-  // if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-  //   // console.log("loadUrl:", `${process.env["ELECTRON_RENDERER_URL"]}${"#/" + route}`)
-  //   modalWindow.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}${route}`);
-  // } else {
-  //   const indexUrl = `${pathJoin(__dirname, `../renderer/index.html`)}`;
-  //   const formattedUrl = url.format({
-  //     pathname: indexUrl,
-  //     hash: route,
-  //     protocol: "file:",
-  //     slashes: true,
-  //   })
-
-  //   modalWindow.loadURL(formattedUrl);
-  // }
 }
 
 // This method will be called when Electron has finished
@@ -108,7 +57,7 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  const mainWindow = createWindow();
+  createWindow();
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
@@ -162,16 +111,9 @@ app.whenReady().then(() => {
   ipcMain.on("open-file", (_event, fileName: string, directory: string) => {
     const fullPath = pathJoin(directory, fileName);
 
-    const encodedPath = encodeURIComponent(fullPath);
-    console.log(encodedPath);
-    // createWindowModal(`/view/${encodedPath}`, mainWindow);
-    createWindowModal(`/skata`, mainWindow);
-
-    // shell
-    //   .openPath(fullPath)
-    //   .catch((err) => {
-    //     throw new Error("Error opening file:" + err);
-    //   });
+    shell.openPath(fullPath).catch((err) => {
+      throw new Error("Error opening file:" + err);
+    });
   });
 
   ipcMain.on("file-yt-search", (_event, fileString: string) => {
