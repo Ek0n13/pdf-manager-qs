@@ -111,7 +111,7 @@ function DirectoriesList() {
 
   return (
     <div>
-      <ul className="divide-y divide-black text-black max-h-[78vh] overflow-y-auto">
+      <ul className="divide-y divide-black text-black max-h-[76vh] overflow-y-auto">
         {childrenDirectories.map((value, index) => (
           <li
             key={index}

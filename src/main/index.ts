@@ -136,8 +136,8 @@ app.whenReady().then(() => {
         dialog.showMessageBoxSync({
           message: "File does not exist.",
 
-          type: "warning",
-          title: "Warning!",
+          type: "error",
+          title: "Error!",
         });
 
         return false;
@@ -147,8 +147,8 @@ app.whenReady().then(() => {
         dialog.showMessageBoxSync({
           message: "Path is not a file.",
 
-          type: "warning",
-          title: "Warning!",
+          type: "error",
+          title: "Error!",
         });
 
         return false;
@@ -161,7 +161,7 @@ app.whenReady().then(() => {
         buttons: ["Yes", "No"],
         defaultId: 0,
         cancelId: 1,
-        title: "Delete",
+        title: "Warning!",
       });
 
       if (result === 0) {
@@ -197,8 +197,8 @@ app.whenReady().then(() => {
         dialog.showMessageBoxSync({
           message: "File does not exist.",
 
-          type: "warning",
-          title: "Warning!",
+          type: "error",
+          title: "Error!",
         });
 
         return null;

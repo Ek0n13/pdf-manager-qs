@@ -54,7 +54,10 @@ function RightParent(props: { className: string; }): JSX.Element {
   return (
     <div id="pdfs-list" className={props.className}>
       <div className={activeDirectory ? "" : " hidden"}>
-        <pre className="px-6 text-center overflow-ellipsis overflow-x-hidden">
+        <pre
+          id="current-folder-info"
+          className="px-6 text-center overflow-ellipsis overflow-x-hidden"
+        >
           <span className="whitespace-nowrap ">{activeDirectory}</span>
           <br />
           Latest:{" "}
@@ -63,7 +66,7 @@ function RightParent(props: { className: string; }): JSX.Element {
           </a>
           <span className="mx-2">|</span>
           <a href="#" onClick={(event) => handleReadTextFile(event)}>
-            <i className="fas fa-download" />
+            <i className="fas fa-download text-lg" />
           </a>
         </pre>
         <PdfsList />
@@ -137,22 +140,23 @@ function PdfsList() {
   const openPdfOnClick = (fileName: string | null) => {
     setLastViewed(fileName);
 
-    setTimeout(() => {
-      window.api.fileYTSearch(fileName!)
-    }, 1000);
+    // setTimeout(() => {
+    //   window.api.fileYTSearch(fileName!)
+    // }, 1000);
   };
 
   return (
     <div
-      id="pdf-list-search"
-      className={pdfsList.length === 0 ? "hidden" : ""}
+      className={`${pdfsList.length === 0 ? "hidden" : ""}`}
     >
       <input
         type="search"
         placeholder="Search..."
         onInput={(event) => liveSearch(event.currentTarget.value)}
       />
-      <ul className="divide-y divide-black text-black max-h-[81vh] overflow-y-auto">
+      <ul
+        className="divide-y divide-black text-black max-h-[80vh] overflow-y-scroll"
+      >
         {displayPdfList.map((value, index) => (
           <li
             id={"item-" + index}
@@ -168,7 +172,7 @@ function PdfsList() {
                 title="Open PDF"
                 onClick={() => openPdfOnClick(value)}
               >
-                <i className="fas fa-file-pdf" />
+                <i className="fas fa-file-pdf text-xl" />
               </Link>
               <a
                 href="#"
@@ -176,7 +180,7 @@ function PdfsList() {
                 title="Save Last Played"
                 onClick={(event) => handleSaveLastPlayed(event, null, value)}
               >
-                <i className="fas fa-floppy-disk" />
+                <i className="fas fa-floppy-disk text-xl" />
               </a>
               {/* <a
                 href="#"
@@ -190,7 +194,7 @@ function PdfsList() {
                 title="Delete File"
                 onClick={(event) => handleDeleteFile(event, value)}
               >
-                <i className="fas fa-trash" />
+                <i className="fas fa-trash text-xl" />
               </a>
             </div>
           </li>
