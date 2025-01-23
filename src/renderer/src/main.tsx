@@ -34,9 +34,7 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <RootRender />
-  );
+  root.render(<RootRender />);
 }
 
 function RootRender(): React.ReactNode {
@@ -50,20 +48,25 @@ function RootRender(): React.ReactNode {
 
   //Right Parent
   const [lastPlayed, setLastPlayed] = useState<string | null>(null);
-  const [displayPdfList, setDisplayPdfList] = useState<string[]>([]);
   const [lastViewed, setLastViewed] = useState<string | null>(null);
 
   const appContext = {
-    activeDirectory, setActiveDirectory,
-    pdfsList, setPdfsList,
+    activeDirectory,
+    setActiveDirectory,
+    pdfsList,
+    setPdfsList,
 
-    parentDirectory, setParentDirectory,
-    childrenDirectories, setChildrenDirectories,
-    parentFolder, setParentFolder,
+    parentDirectory,
+    setParentDirectory,
+    childrenDirectories,
+    setChildrenDirectories,
+    parentFolder,
+    setParentFolder,
 
-    lastPlayed, setLastPlayed,
-    displayPdfList, setDisplayPdfList,
-    lastViewed, setLastViewed,
+    lastPlayed,
+    setLastPlayed,
+    lastViewed,
+    setLastViewed,
   };
 
   return (

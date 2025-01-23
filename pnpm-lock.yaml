@@ -23,6 +23,9 @@ importers:
       electron-updater:
         specifier: ^6.3.9
         version: 6.3.9
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.1
     devDependencies:
       '@electron-toolkit/eslint-config-prettier':
         specifier: ^2.0.0
