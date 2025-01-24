@@ -11,14 +11,12 @@ function LeftParent(props: { className: string }): JSX.Element {
 
     parentDirectory,
     setParentDirectory,
-    // childrenDirectories,
     setChildrenDirectories,
     parentFolder,
     setParentFolder,
   } = useContext(AppContext);
 
   const navigate = route.useNavigate();
-  // const snapshotChildren = useRef<string[]>([]);
 
   const handleDirectoryDialog = async () => {
     const dir = await window.api.directoryDialog();
@@ -44,40 +42,27 @@ function LeftParent(props: { className: string }): JSX.Element {
     if (!children) return;
 
     // ** REMOVE THIS **
-    const x: string[] = Array(20).fill(children).flat();
+    const x: string[] = Array(1).fill(children).flat();
     // ** REMOVE THIS **
 
-    // snapshotChildren.current = x;
     setChildrenDirectories(x);
   };
 
-  // const liveSearch = (inputValue: string) => {
-  //   if (inputValue === "" || inputValue === null) {
-  //     setChildrenDirectories(snapshotChildren.current);
-  //     return;
-  //   }
-
-  //   const filteredPdfList = snapshotChildren.current.filter((item) =>
-  //     item.toLowerCase().includes(inputValue.toLowerCase()),
-  //   );
-  //   setChildrenDirectories(filteredPdfList);
-  // };
-
   return (
     <div id="left-side" className={props.className}>
+      <div id="buttons" className="flex justify-center">
+        <button onClick={handleDirectoryDialog}>Choose Folder</button>
+        <button
+          disabled={parentDirectory === null || parentDirectory === ""}
+          className="disabled:pointer-events-none disabled:opacity-30"
+          onClick={handleGetChildDirectories}
+        >
+          Get Sub Folders
+        </button>
+      </div>
       <div
         className={`sticky top-0 bg-gray-200 ${parentDirectory ? "" : "hidden"}`}
       >
-        <div id="buttons" className="flex justify-center">
-          <button onClick={handleDirectoryDialog}>Choose Folder</button>
-          <button
-            disabled={parentDirectory === null || parentDirectory === ""}
-            className="disabled:pointer-events-none disabled:opacity-30"
-            onClick={handleGetChildDirectories}
-          >
-            Get Sub Folders
-          </button>
-        </div>
         <pre className="text-center">{"Parent Folder: " + parentFolder}</pre>
         <input
           type="search"
@@ -115,7 +100,7 @@ function DirectoriesList() {
     const fileList = await window.api.readDirectory(activeDir!);
 
     // ** REMOVE THIS **
-    const x: string[] = Array(4).fill(fileList).flat();
+    const x: string[] = Array(1).fill(fileList).flat();
     // ** REMOVE THIS **
 
     setPdfsList(x);
