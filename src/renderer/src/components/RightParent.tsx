@@ -52,12 +52,14 @@ function RightParent(props: { className: string }): JSX.Element {
           className="px-6 text-center overflow-ellipsis overflow-x-hidden"
         >
           <span className="whitespace-nowrap">{activeDirectory}</span>
-          <div className="text-nowrap">
+          <div className="text-nowrap flex flex-row justify-center">
             <span>Latest: </span>
-            <a href="#" onClick={(event) => scrollTo(event, lastPlayed!)}>
-              <span className="max-w-4 whitespace-nowrap overflow-ellipsis overflow-x-hidden">
-                {lastPlayed || "<none>"}
-              </span>
+            <a
+              href="#"
+              className="overflow-ellipsis overflow-x-hidden"
+              onClick={(event) => scrollTo(event, lastPlayed!)}
+            >
+              {lastPlayed || "<none>"}
             </a>
             <span className="mx-2">|</span>
             <a href="#" onClick={(event) => handleReadTextFile(event)}>
