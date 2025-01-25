@@ -11,10 +11,14 @@ declare global {
       directoryDialog: () => Promise<string | null>;
       getChildDirectories: (directory: string) => Promise<string[]>;
 
-      openFile: (filePath: string, directory: string) => void;
+      openFile: (filePath: string, directory: string | null) => void;
       deleteFile: (fileName: string, directory: string) => Promise<boolean>;
       fileYTSearch: (fileName: string) => void;
       saveLastPlayed: (fileName: string | null, data: string) => void;
+      saveLastPlayedAsync: (
+        fileName: string | null,
+        data: string,
+      ) => Promise<boolean>;
 
       getPdfFile: (path: string) => Promise<string>;
     };

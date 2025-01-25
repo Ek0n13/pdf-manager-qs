@@ -61,7 +61,8 @@ function LeftParent(props: { className: string }): JSX.Element {
         </button>
       </div>
       <div
-        className={`sticky top-0 bg-gray-200 ${parentDirectory ? "" : "hidden"}`}
+        id="current-foler-w-search"
+        className={`${parentDirectory ? "" : "hidden"}`}
       >
         <pre className="text-center">{"Parent Folder: " + parentFolder}</pre>
         <input
@@ -107,8 +108,8 @@ function DirectoriesList() {
   };
   //max-h-[76vh] overflow-y-auto
   return (
-    <div>
-      <ul className="divide-y divide-black text-black max-h-[76vh] overflow-y-auto">
+    <div className="max-h-[72vh] overflow-y-auto">
+      <ul className="divide-y divide-black text-black">
         {childrenDirectories
           .filter((item) =>
             item.toLowerCase().includes(folderName?.toLowerCase() ?? ""),

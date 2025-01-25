@@ -1,31 +1,43 @@
-import { createFileRoute, Await, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react';
+import { createFileRoute, Await, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 // import ViewPdf from "@renderer/components/ViewPdf";
 
-export const Route = createFileRoute('/view/$path')({
+export const Route = createFileRoute("/view/$path")({
   loader: async ({ params }) => {
     try {
       const newPath = decodeURIComponent(params.path);
-      const pdfSlow = getPdfSlow(newPath)
-      return { pdfUrl: pdfSlow }
+      const pdfSlow = getPdfSlow(newPath);
+
+      const fileName = returnString(newPath);
+
+      return { pdfUrl: pdfSlow, pdfFileName: fileName };
     } catch (error) {
-      throw error
+      throw error;
     }
   },
   component: ViewPdf,
-})
+});
 
 async function getPdfSlow(path: string) {
-  const base64 = await window.api.getPdfFile(path)
+  const base64 = await window.api.getPdfFile(path);
   return new Promise<string>((resolve) => {
-    resolve(`data:application/pdf;base64,${base64}`)
-  })
+    resolve(`data:application/pdf;base64,${base64}`);
+  });
+}
+
+async function returnString(param: string) {
+  return new Promise<string>((resolve) => {
+    resolve(param);
+  });
 }
 
 function ViewPdf(): JSX.Element {
-  const { pdfUrl } = Route.useLoaderData();
-  
-  const [windowSize, setWindowSize] = useState<{width: number, height: number}>({
+  const { pdfUrl, pdfFileName } = Route.useLoaderData();
+
+  const [windowSize, setWindowSize] = useState<{
+    width: number;
+    height: number;
+  }>({
     width: window.innerWidth,
     height: window.innerHeight,
   });
@@ -43,20 +55,37 @@ function ViewPdf(): JSX.Element {
     return () => window.removeEventListener("resize", handleResize);
   });
 
-  return (
-    <div
-      className="w-full max-h-screen flex flex-col place-items-center"
-    >
+  const handleOpenFile = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    path: string,
+  ) => {
+    event.preventDefault();
 
-      <nav
-        className="sticky bg-gray-200 shadow shadow-gray-300 w-full"
-      >
-        <Link
-          to="/"
-          className="text-black ml-1"
-          title="Go Back"
-        >
-          <i className="fa fa-arrow-left-long text-2xl p-1 my-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700 " />
+    window.api.openFile(path, null);
+  };
+
+  return (
+    <div className="w-full max-h-screen flex flex-col place-items-center">
+      <nav className="sticky bg-gray-200 shadow shadow-gray-300 w-full text-black flex items-center justify-between">
+        <Await promise={pdfFileName} fallback="loading...">
+          {(data) => {
+            return (
+              <div>
+                <a href="#" onClick={(event) => handleOpenFile(event, data)}>
+                  <span className="px-2">
+                    {data.split("\\").pop() ?? "<none>"}
+                  </span>
+                </a>
+                <span className="px-1 text-xs font-bold italic">
+                  {`Click if no PDF displayed`}
+                </span>
+              </div>
+            );
+          }}
+        </Await>
+
+        <Link to="/" className="text-black mr-1" title="Go Back">
+          <i className="fa fa-xmark text-3xl px-1 my-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700 " />
         </Link>
       </nav>
 
@@ -64,17 +93,29 @@ function ViewPdf(): JSX.Element {
         <Await promise={pdfUrl} fallback="loading...">
           {(data) => {
             return (
-              <iframe
-                src={`${data}#toolbar=0&view=FitH`}
-                className="p-2 w-full"
-                style={{ height: `${Math.floor(windowSize.height*0.95)}px` }}
-              // style={{ width: "100%", height: "100%" }}
-              ></iframe>
-            )
+              <>
+                <embed
+                  src={`${data}#toolbar=0&view=FitH`}
+                  itemType="application/pdf"
+                  className="p-2 w-full"
+                  style={{
+                    height: `${Math.floor(windowSize.height * 0.95)}px`,
+                  }}
+                ></embed>
+
+                {/* <iframe
+                  src={`${data}#toolbar=0&view=FitH`}
+                  itemType="application/pdf"
+                  className="p-2 w-full"
+                  style={{
+                    height: `${Math.floor(windowSize.height * 0.95)}px`,
+                  }}
+                ></iframe> */}
+              </>
+            );
           }}
         </Await>
       </div>
-
     </div>
-  )
+  );
 }

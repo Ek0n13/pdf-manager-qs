@@ -11,7 +11,7 @@ const api = {
   getChildDirectories: (directory: string) =>
     ipcRenderer.invoke("get-child-directories", directory),
 
-  openFile: (fileName: string, directory: string) =>
+  openFile: (fileName: string, directory: string | null) =>
     ipcRenderer.send("open-file", fileName, directory),
   deleteFile: (fileName: string, directory: string) =>
     ipcRenderer.invoke("delete-file", fileName, directory),
@@ -22,6 +22,8 @@ const api = {
     ipcRenderer.invoke("read-text-file", filePath),
   saveLastPlayed: (fileName: string | null, data: string) =>
     ipcRenderer.send("save-last-played", fileName, data),
+  saveLastPlayedAsync: (fileName: string | null, data: string) =>
+    ipcRenderer.invoke("save-last-played-async", fileName, data),
 
   getPdfFile: (path: string) => ipcRenderer.invoke("get-pdf-file", path),
 };

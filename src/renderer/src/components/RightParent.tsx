@@ -23,13 +23,7 @@ function RightParent(props: { className: string }): JSX.Element {
     if (smooth) element?.scrollIntoView({ behavior: "smooth", block: "start" });
     else element?.scrollIntoView();
 
-    setTimeout(() => {
-      element?.classList.add("highlight");
-    }, 250);
-
-    setTimeout(() => {
-      element?.classList.remove("highlight");
-    }, 2000);
+    element?.classList.add("highlight");
   };
 
   const scrollTo = (
@@ -52,31 +46,32 @@ function RightParent(props: { className: string }): JSX.Element {
 
   return (
     <div id="pdfs-list" className={props.className}>
-      <div className={activeDirectory ? "" : " hidden"}>
-        <div className="sticky top-0">
-          <pre
-            id="current-folder-info"
-            className="px-6 text-center overflow-ellipsis overflow-x-hidden"
-          >
-            <span className="whitespace-nowrap ">{activeDirectory}</span>
-            <br />
-            Latest:{" "}
+      <div className={`flex flex-col ${activeDirectory ? "" : "hidden"}`}>
+        <pre
+          id="current-folder-info"
+          className="px-6 text-center overflow-ellipsis overflow-x-hidden"
+        >
+          <span className="whitespace-nowrap">{activeDirectory}</span>
+          <div className="text-nowrap">
+            <span>Latest: </span>
             <a href="#" onClick={(event) => scrollTo(event, lastPlayed!)}>
-              {lastPlayed || "<none>"}
+              <span className="max-w-4 whitespace-nowrap overflow-ellipsis overflow-x-hidden">
+                {lastPlayed || "<none>"}
+              </span>
             </a>
             <span className="mx-2">|</span>
             <a href="#" onClick={(event) => handleReadTextFile(event)}>
               <i className="fas fa-download text-lg" />
             </a>
-          </pre>
-          <input
-            type="search"
-            placeholder="Search..."
-            onChange={(event) =>
-              navigate({ search: { pdfName: event.target.value } })
-            }
-          />
-        </div>
+          </div>
+        </pre>
+        <input
+          type="search"
+          placeholder="Search..."
+          onChange={(event) =>
+            navigate({ search: { pdfName: event.target.value } })
+          }
+        />
         <PdfsList />
       </div>
     </div>
@@ -84,19 +79,25 @@ function RightParent(props: { className: string }): JSX.Element {
 }
 
 function PdfsList() {
-  const { activeDirectory, pdfsList, setPdfsList, setLastViewed } =
-    useContext(AppContext);
+  const {
+    activeDirectory,
+    pdfsList,
+    setPdfsList,
+    setLastViewed,
+    setLastPlayed,
+  } = useContext(AppContext);
 
   const { pdfName } = route.useSearch();
 
-  const handleSaveLastPlayed = (
+  const handleSaveLastPlayed = async (
     event: React.MouseEvent<HTMLAnchorElement>,
     fileName: string | null,
     data: string,
   ) => {
     event.preventDefault();
 
-    window.api.saveLastPlayed(fileName, data);
+    const isSaved = await window.api.saveLastPlayedAsync(fileName, data);
+    if (isSaved) setLastPlayed(data);
   };
 
   // const handleYTSearch = (
@@ -132,9 +133,22 @@ function PdfsList() {
     }, 1000);
   };
 
+  const removeHighlight = () => {
+    const highlightedElements = document.getElementsByClassName("highlight");
+    if (highlightedElements.length === 0) return;
+    if (highlightedElements.length > 1) throw new Error("Higlighting error");
+    const element = highlightedElements.item(0);
+    setTimeout(() => {
+      element?.classList.remove("highlight");
+    }, 5000);
+  };
+
   return (
-    <div className={`${pdfsList.length === 0 ? "hidden" : ""}`}>
-      <ul className="divide-y divide-black text-black max-h-[80vh] overflow-y-scroll">
+    <div
+      className={`max-h-[76vh] overflow-y-scroll ${pdfsList.length === 0 ? "hidden" : ""}`}
+      onScroll={removeHighlight}
+    >
+      <ul className="divide-y divide-black text-black">
         {pdfsList
           .filter((item) =>
             item.toLowerCase().includes(pdfName?.toLowerCase() ?? ""),
@@ -145,10 +159,10 @@ function PdfsList() {
               key={"open-" + index}
               className="mx-4 px-2 flex justify-between items-center text-black rounded-sm highlightable"
             >
-              <span className="overflow-ellipsis overflow-x-hidden">
+              <span className="overflow-ellipsis overflow-x-hidden whitespace-nowrap">
                 {value}
               </span>
-              <div className="pl-10 my-1 flex">
+              <div className="pl-10 my-1">
                 <Link
                   to="/view/$path"
                   params={{ path: activeDirectory + "\\" + value }}

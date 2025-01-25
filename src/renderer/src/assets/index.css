@@ -69,13 +69,13 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  /* font-size: 1em; */
+  font-size: 0.8em;
   /* font-weight: 500; */
   /* transition: border-color 0.25s; */
 }
 
 button:hover {
-  border-color: #646cff;
+  border-color: hsl(237, 80%, 60%);
 }
 
 button:focus,

@@ -8,12 +8,8 @@ function App() {
       className="p-4 grid grid-cols-6 gap-2 leading-8 h-screen max-h-screen"
       // style={{height: "10vh"}}
     >
-      <LeftParent
-        className="p-4 w-full h-full bg-gray-200 col-span-2 rounded-md max-h-screen overflow-y-auto"
-      />
-      <RightParent
-        className="p-4 w-full h-full bg-gray-200 col-span-4 rounded-md max-h-screen overflow-y-auto"
-      />
+      <LeftParent className="p-4 w-full h-full bg-gray-200 col-span-2 rounded-md flex flex-col overflow-y-auto" />
+      <RightParent className="p-4 w-full h-full bg-gray-200 col-span-4 rounded-md overflow-y-auto" />
     </div>
   );
 }

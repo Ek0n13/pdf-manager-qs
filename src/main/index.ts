@@ -116,61 +116,26 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.on("open-file", (_event, fileName: string, directory: string) => {
-    const fullPath = pathJoin(directory, fileName);
+  ipcMain.on(
+    "open-file",
+    (_event, fileName: string, directory: string | null) => {
+      const fullPath =
+        directory === null ? fileName : pathJoin(directory, fileName);
 
-    shell.openPath(fullPath).catch((err) => {
-      throw new Error("Error opening file:" + err);
-    });
-  });
+      shell.openPath(fullPath).catch((err) => {
+        throw new Error("Error opening file:" + err);
+      });
+    },
+  );
 
   ipcMain.handle(
     "delete-file",
     (_event, fileName: string, directory: string) => {
-      const fullPath = pathJoin(directory, fileName);
-
-      const fileExists = fs.existsSync(fullPath);
-      const isFile = fs.statSync(fullPath).isFile();
-
-      if (!fileExists) {
-        dialog.showMessageBoxSync({
-          message: "File does not exist.",
-
-          type: "error",
-          title: "Error!",
-        });
-
-        return false;
+      try {
+        return deleteFile(fileName, directory);
+      } catch (error) {
+        throw new Error("Error deleting file: " + error);
       }
-
-      if (!isFile) {
-        dialog.showMessageBoxSync({
-          message: "Path is not a file.",
-
-          type: "error",
-          title: "Error!",
-        });
-
-        return false;
-      }
-
-      const result = dialog.showMessageBoxSync({
-        message: `Delete file: "${fileName}"?`,
-
-        type: "warning",
-        buttons: ["Yes", "No"],
-        defaultId: 0,
-        cancelId: 1,
-        title: "Warning!",
-      });
-
-      if (result === 0) {
-        // fs.rmSync(fullPath);
-        shell.trashItem(fullPath);
-        return true;
-      }
-
-      return false;
     },
   );
 
@@ -213,22 +178,19 @@ app.whenReady().then(() => {
   ipcMain.on(
     "save-last-played",
     (_event, fileName: string | null, data: string) => {
-      const file = pathJoin(createLastPlayedDir(), fileName || "tattos.txt");
-
       try {
-        const result = dialog.showMessageBoxSync({
-          message: "Save last played?",
+        saveLastPlayed(fileName, data);
+      } catch (error) {
+        throw new Error("Error saving last played: " + error);
+      }
+    },
+  );
 
-          type: "question",
-          buttons: ["Yes", "No"],
-          defaultId: 0,
-          cancelId: 1,
-          title: "Confirm Action",
-        });
-
-        if (result === 0) {
-          fs.writeFileSync(file, data);
-        }
+  ipcMain.handle(
+    "save-last-played-async",
+    (_event, fileName: string | null, data: string) => {
+      try {
+        return saveLastPlayed(fileName, data);
       } catch (error) {
         throw new Error("Error saving last played: " + error);
       }
@@ -256,6 +218,74 @@ app.on("window-all-closed", () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+function saveLastPlayed(fileName: string | null, data: string): boolean {
+  const file = pathJoin(createLastPlayedDir(), fileName || "tattos.txt");
+
+  const result = dialog.showMessageBoxSync({
+    message: "Save last played?",
+
+    type: "question",
+    buttons: ["Yes", "No"],
+    defaultId: 0,
+    cancelId: 1,
+    title: "Confirm Action",
+  });
+
+  if (result === 0) {
+    fs.writeFileSync(file, data);
+    return true;
+  }
+
+  return false;
+}
+
+function deleteFile(fileName: string, directory: string): boolean {
+  const fullPath = pathJoin(directory, fileName);
+
+  const fileExists = fs.existsSync(fullPath);
+  const isFile = fs.statSync(fullPath).isFile();
+
+  if (!fileExists) {
+    dialog.showMessageBoxSync({
+      message: "File does not exist.",
+
+      type: "error",
+      title: "Error!",
+    });
+
+    return false;
+  }
+
+  if (!isFile) {
+    dialog.showMessageBoxSync({
+      message: "Path is not a file.",
+
+      type: "error",
+      title: "Error!",
+    });
+
+    return false;
+  }
+
+  const result = dialog.showMessageBoxSync({
+    message: `Delete file: "${fileName}"?`,
+
+    type: "warning",
+    buttons: ["Yes", "No"],
+    defaultId: 0,
+    cancelId: 1,
+    title: "Warning!",
+  });
+
+  if (result === 0) {
+    // fs.rmSync(fullPath);
+    shell.trashItem(fullPath);
+    return true;
+  }
+
+  return false;
+}
+
 function openInEdge(url: string): void {
   const msedgePath = pathJoin(
     "C:",

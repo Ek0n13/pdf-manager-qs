@@ -39,3 +39,10 @@
 .highlightable.highlight {
   background-color: hsla(0, 100%, 69%, 0.8);
 }
+
+@media (prefers-color-scheme: light) {
+  input[type="search"] {
+    background-color: white;
+    color: black;
+  }
+}
