@@ -10,9 +10,10 @@ export const Route = createFileRoute("/view/$path")({
 
       const fileName = returnString(newPath);
 
-      const yt = youtubeSearchResults("subtact step up");
+      // use the results from loader by querying the fileName
+      // const yt = youtubeSearchResults(filename);
 
-      return { pdfUrl: pdfSlow, pdfFileName: fileName , ytResults: yt };
+      return { pdfUrl: pdfSlow, pdfFileName: fileName };
     } catch (error) {
       throw error;
     }
@@ -45,7 +46,7 @@ async function youtubeSearchResults(query: string) {
 }
 
 function ViewPdf(): JSX.Element {
-  const { pdfUrl, pdfFileName , ytResults } = Route.useLoaderData();
+  const { pdfUrl, pdfFileName } = Route.useLoaderData();
 
   const [windowSize, setWindowSize] = useState<{
     width: number;
@@ -77,50 +78,71 @@ function ViewPdf(): JSX.Element {
     window.api.openFile(path, null);
   };
 
-  
+  const handleShowModal = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+
+    const ytResults = await window.api.youtubeSearchResults("subtact step up");
+    console.log(ytResults);
+
+    const element = document.getElementById("youtube-search-modal");
+    element?.classList.toggle("opacity-0");
+  }
 
   return (
     <div className="w-full max-h-screen flex flex-col place-items-center">
-      <nav className="sticky bg-gray-200 shadow shadow-gray-300 w-full text-black flex items-center justify-between">
-        <Await promise={pdfFileName} fallback="loading...">
-          {(data) => {
-            return (
-              <div>
-                <a href="#" onClick={(event) => handleOpenFile(event, data)}>
-                  <span className="px-2">
-                    {data.split("\\").pop() ?? "<none>"}
+      <nav className="sticky py-1 bg-gray-200 shadow shadow-gray-300 w-full text-black flex items-center justify-between">
+        <div className="flex flex-row divide-x-2 divide-solid divide-slate-400">
+          <Await promise={pdfFileName} fallback="loading...">
+            {(data) => {
+              return (
+                <div className="pt-1">
+                  <a href="#" onClick={(event) => handleOpenFile(event, data)}>
+                    <span className="px-2">
+                      {data.split("\\").pop() ?? "<none>"}
+                    </span>
+                  </a>{" "}
+                  <span className="pr-2 text-xs font-bold italic">
+                    {`Click if no PDF displayed`}
                   </span>
-                </a>{" "}
-                <span className="text-xs font-bold italic">
-                  {`Click if no PDF displayed`}
-                </span>
-              </div>
-            );
-          }}
-        </Await>
-
+                </div>
+              );
+            }}
+          </Await>
+          <a
+            href="#"
+            className="px-2 text-black"
+            onClick={(event) => handleShowModal(event)}
+          >
+            <i className="fa-brands fa-youtube text-2xl px-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700" />
+          </a>
+        </div>
         <Link to="/" className="text-black mr-1 hover:text-red-600" title="Go Back">
-          <i className="fa fa-xmark text-3xl px-1 my-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-red-600 " />
+          <i className="fa fa-xmark text-3xl px-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-red-600" />
         </Link>
       </nav>
 
-      <div className="hidden">
-        <Await promise={ytResults} fallback="loading...">
-          {(data) => {
-            return (
-            <>
-              <iframe className="absolute top-1 left-1 bg-red-600" src={`https://www.youtube.com/embed/${data![0].id?.videoId}`}></iframe>
-            </>
-            )
-          }}
-        </Await>
-      </div>
-      
-      <div className="w-full pl-2 pr-4 max-h-screen overflow-y-auto bg-gray-400">
-        <Await promise={pdfUrl} fallback="loading...">
-          {(data) => {
-            return (
+      <div id="youtube-search-modal" className="opacity-0 bg-gray-200 shadow-xl border-solid border-black border-2">
+        <span className="text-black">hello</span>
+          {/* <Await promise={ytResults} fallback="loading...">
+            {(data) => {
+              
+
+              return (
               <>
+                <iframe className="absolute top-1 left-1 bg-red-600" src={`https://www.youtube.com/embed/${data![0].id?.videoId}`}></iframe>
+              </>
+              )
+            }}
+          </Await> */}
+        </div>
+      
+      <div className="w-full">
+        
+
+        <div className="w-full pl-2 pr-4 max-h-screen overflow-y-auto bg-gray-400">
+          <Await promise={pdfUrl} fallback="loading...">
+            {(data) => {
+              return (
                 <embed
                   src={`${data}#toolbar=0&view=FitH`}
                   itemType="application/pdf"
@@ -129,19 +151,10 @@ function ViewPdf(): JSX.Element {
                     height: `${Math.floor(windowSize.height * 0.95)}px`,
                   }}
                 ></embed>
-
-                {/* <iframe
-                  src={`${data}#toolbar=0&view=FitH`}
-                  itemType="application/pdf"
-                  className="p-2 w-full"
-                  style={{
-                    height: `${Math.floor(windowSize.height * 0.95)}px`,
-                  }}
-                ></iframe> */}
-              </>
-            );
-          }}
-        </Await>
+              );
+            }}
+          </Await>
+        </div>
       </div>
     </div>
   );

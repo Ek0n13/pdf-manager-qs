@@ -40,6 +40,24 @@
   background-color: hsla(0, 100%, 69%, 0.8);
 }
 
+#youtube-search-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 40vw;
+  height: 90vh;
+
+  border-radius: 0.375rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: opacity 500ms ease;
+}
+
 @media (prefers-color-scheme: light) {
   input[type="search"] {
     background-color: white;
