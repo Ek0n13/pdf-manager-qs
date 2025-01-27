@@ -343,14 +343,12 @@ function createLastPlayedDir(): string {
   return lastPlayedDir;
 }
 
-// API Key:
-// AIzaSyDZseHNHpDXBeiNimbuoO5kGtZFfKlrbTY
 async function youtubeSearchResults(
   query: string,
 ): Promise<Array<youtube_v3.Schema$SearchResult> | undefined> {
   const youtube = google.youtube({
     version: "v3",
-    auth: "AIzaSyDZseHNHpDXBeiNimbuoO5kGtZFfKlrbTY",
+    auth: "",
   });
 
   const response = await youtube.search.list({
