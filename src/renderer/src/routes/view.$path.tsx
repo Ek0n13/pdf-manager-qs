@@ -1,6 +1,6 @@
 import { createFileRoute, Await, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-// import { youtube_v3 } from "googleapis";
+import { youtube_v3 } from "googleapis";
 
 export const Route = createFileRoute("/view/$path")({
   loader: async ({ params }) => {
@@ -10,9 +10,9 @@ export const Route = createFileRoute("/view/$path")({
 
       const fileName = returnString(newPath);
 
-      // const yt = youtubeSearchResults("subtact step up");
+      const yt = youtubeSearchResults("subtact step up");
 
-      return { pdfUrl: pdfSlow, pdfFileName: fileName /*, ytResults: yt*/ };
+      return { pdfUrl: pdfSlow, pdfFileName: fileName , ytResults: yt };
     } catch (error) {
       throw error;
     }
@@ -36,16 +36,16 @@ async function returnString(param: string) {
   });
 }
 
-// async function youtubeSearchResults(query: string) {
-//   const ytResults = await window.api.youtubeSearchResults(query);
+async function youtubeSearchResults(query: string) {
+  const ytResults = await window.api.youtubeSearchResults(query);
 
-//   return new Promise<Array<youtube_v3.Schema$SearchResult> | undefined>((resolve) => {
-//     resolve(ytResults);
-//   })
-// }
+  return new Promise<Array<youtube_v3.Schema$SearchResult> | undefined>((resolve) => {
+    resolve(ytResults);
+  })
+}
 
 function ViewPdf(): JSX.Element {
-  const { pdfUrl, pdfFileName /*, ytResults*/ } = Route.useLoaderData();
+  const { pdfUrl, pdfFileName , ytResults } = Route.useLoaderData();
 
   const [windowSize, setWindowSize] = useState<{
     width: number;
@@ -104,7 +104,7 @@ function ViewPdf(): JSX.Element {
         </Link>
       </nav>
 
-      {/* <div className="">
+      <div className="hidden">
         <Await promise={ytResults} fallback="loading...">
           {(data) => {
             return (
@@ -114,7 +114,7 @@ function ViewPdf(): JSX.Element {
             )
           }}
         </Await>
-      </div> */}
+      </div>
       
       <div className="w-full pl-2 pr-4 max-h-screen overflow-y-auto bg-gray-400">
         <Await promise={pdfUrl} fallback="loading...">

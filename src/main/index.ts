@@ -346,9 +346,10 @@ function createLastPlayedDir(): string {
 async function youtubeSearchResults(
   query: string,
 ): Promise<Array<youtube_v3.Schema$SearchResult> | undefined> {
+  console.log(process.env);
   const youtube = google.youtube({
     version: "v3",
-    auth: "",
+    auth: import.meta.env["VITE_YOUTUBE_API_KEY"],
   });
 
   const response = await youtube.search.list({
