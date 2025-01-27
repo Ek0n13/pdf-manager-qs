@@ -26,6 +26,9 @@ const api = {
     ipcRenderer.invoke("save-last-played-async", fileName, data),
 
   getPdfFile: (path: string) => ipcRenderer.invoke("get-pdf-file", path),
+
+  youtubeSearchResults: (query: string) =>
+    ipcRenderer.invoke("youtube-search-results", query),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

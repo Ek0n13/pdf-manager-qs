@@ -1,9 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain, screen, dialog } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
-import icon from "../../resources/icon.png?asset";
 import { join as pathJoin, parse as pathParse } from "path";
 import { exec } from "child_process";
 import * as fs from "fs";
+import { google, youtube_v3 } from "googleapis";
+
+import icon from "../../resources/icon.png?asset";
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -27,6 +29,7 @@ function createWindow() {
 
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
+    // mainWindow.maximize();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -200,9 +203,18 @@ app.whenReady().then(() => {
   ipcMain.handle("get-pdf-file", async (_event, path) => {
     try {
       const buffer = fs.readFileSync(path);
-      return buffer.toString("base64");
+      return buffer;
     } catch (error) {
       throw new Error("Error getting pdf file: " + error);
+    }
+  });
+
+  ipcMain.handle("youtube-search-results", async (_event, query) => {
+    try {
+      const response = await youtubeSearchResults(query);
+      return response;
+    } catch (error) {
+      throw new Error("Error getting youtube search results: " + error);
     }
   });
 });
@@ -329,4 +341,23 @@ function createLastPlayedDir(): string {
   }
 
   return lastPlayedDir;
+}
+
+// API Key:
+// AIzaSyDZseHNHpDXBeiNimbuoO5kGtZFfKlrbTY
+async function youtubeSearchResults(
+  query: string,
+): Promise<Array<youtube_v3.Schema$SearchResult> | undefined> {
+  const youtube = google.youtube({
+    version: "v3",
+    auth: "AIzaSyDZseHNHpDXBeiNimbuoO5kGtZFfKlrbTY",
+  });
+
+  const response = await youtube.search.list({
+    part: ["snippet"],
+    q: query,
+    maxResults: 10,
+  });
+
+  return response.data.items;
 }

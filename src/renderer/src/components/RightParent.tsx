@@ -144,7 +144,7 @@ function PdfsList() {
       element?.classList.remove("highlight");
     }, 5000);
   };
-
+  //max-h-[76vh]
   return (
     <div
       className={`max-h-[76vh] overflow-y-scroll ${pdfsList.length === 0 ? "hidden" : ""}`}
@@ -164,7 +164,7 @@ function PdfsList() {
               <span className="overflow-ellipsis overflow-x-hidden whitespace-nowrap">
                 {value}
               </span>
-              <div className="pl-10 my-1">
+              <div className="pl-10 my-1 whitespace-nowrap">
                 <Link
                   to="/view/$path"
                   params={{ path: activeDirectory + "\\" + value }}
@@ -182,13 +182,6 @@ function PdfsList() {
                 >
                   <i className="fas fa-floppy-disk text-xl" />
                 </a>
-                {/* <a
-                href="#"
-                title="Search on YT"
-                onClick={(event) => handleYTSearch(event, value)}
-              >
-                <i className="fa fa-magnifying-glass" />
-              </a> */}
                 <a
                   href="#"
                   title="Delete File"

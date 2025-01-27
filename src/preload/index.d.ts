@@ -1,4 +1,5 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
+import { youtube_v3 } from "googleapis";
 
 declare global {
   interface Window {
@@ -20,7 +21,11 @@ declare global {
         data: string,
       ) => Promise<boolean>;
 
-      getPdfFile: (path: string) => Promise<string>;
+      getPdfFile: (path: string) => Promise<Buffer>;
+
+      youtubeSearchResults: (
+        query: string,
+      ) => Promise<Array<youtube_v3.Schema$SearchResult> | undefined>;
     };
   }
 }

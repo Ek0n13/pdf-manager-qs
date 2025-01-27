@@ -3,6 +3,7 @@ import { AppContext } from "@renderer/contexts/AppContext";
 import { getRouteApi } from "@tanstack/react-router";
 
 const route = getRouteApi("/");
+const multItems = 1;
 
 function LeftParent(props: { className: string }): JSX.Element {
   const {
@@ -42,7 +43,7 @@ function LeftParent(props: { className: string }): JSX.Element {
     if (!children) return;
 
     // ** REMOVE THIS **
-    const x: string[] = Array(1).fill(children).flat();
+    const x: string[] = Array(multItems).fill(children).flat();
     // ** REMOVE THIS **
 
     setChildrenDirectories(x);
@@ -101,7 +102,7 @@ function DirectoriesList() {
     const fileList = await window.api.readDirectory(activeDir!);
 
     // ** REMOVE THIS **
-    const x: string[] = Array(1).fill(fileList).flat();
+    const x: string[] = Array(Math.ceil(multItems / 4)).fill(fileList).flat();
     // ** REMOVE THIS **
 
     setPdfsList(x);

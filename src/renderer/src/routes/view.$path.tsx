@@ -1,6 +1,6 @@
 import { createFileRoute, Await, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-// import ViewPdf from "@renderer/components/ViewPdf";
+// import { youtube_v3 } from "googleapis";
 
 export const Route = createFileRoute("/view/$path")({
   loader: async ({ params }) => {
@@ -10,7 +10,9 @@ export const Route = createFileRoute("/view/$path")({
 
       const fileName = returnString(newPath);
 
-      return { pdfUrl: pdfSlow, pdfFileName: fileName };
+      // const yt = youtubeSearchResults("subtact step up");
+
+      return { pdfUrl: pdfSlow, pdfFileName: fileName /*, ytResults: yt*/ };
     } catch (error) {
       throw error;
     }
@@ -19,9 +21,12 @@ export const Route = createFileRoute("/view/$path")({
 });
 
 async function getPdfSlow(path: string) {
-  const base64 = await window.api.getPdfFile(path);
+  const buffer: Buffer = await window.api.getPdfFile(path);
+  const blob = new Blob([buffer], {type: "application/pdf"});
+  const url = window.URL.createObjectURL(blob);
+
   return new Promise<string>((resolve) => {
-    resolve(`data:application/pdf;base64,${base64}`);
+    resolve(url)
   });
 }
 
@@ -31,8 +36,16 @@ async function returnString(param: string) {
   });
 }
 
+// async function youtubeSearchResults(query: string) {
+//   const ytResults = await window.api.youtubeSearchResults(query);
+
+//   return new Promise<Array<youtube_v3.Schema$SearchResult> | undefined>((resolve) => {
+//     resolve(ytResults);
+//   })
+// }
+
 function ViewPdf(): JSX.Element {
-  const { pdfUrl, pdfFileName } = Route.useLoaderData();
+  const { pdfUrl, pdfFileName /*, ytResults*/ } = Route.useLoaderData();
 
   const [windowSize, setWindowSize] = useState<{
     width: number;
@@ -64,6 +77,8 @@ function ViewPdf(): JSX.Element {
     window.api.openFile(path, null);
   };
 
+  
+
   return (
     <div className="w-full max-h-screen flex flex-col place-items-center">
       <nav className="sticky bg-gray-200 shadow shadow-gray-300 w-full text-black flex items-center justify-between">
@@ -75,8 +90,8 @@ function ViewPdf(): JSX.Element {
                   <span className="px-2">
                     {data.split("\\").pop() ?? "<none>"}
                   </span>
-                </a>
-                <span className="px-1 text-xs font-bold italic">
+                </a>{" "}
+                <span className="text-xs font-bold italic">
                   {`Click if no PDF displayed`}
                 </span>
               </div>
@@ -84,11 +99,23 @@ function ViewPdf(): JSX.Element {
           }}
         </Await>
 
-        <Link to="/" className="text-black mr-1" title="Go Back">
-          <i className="fa fa-xmark text-3xl px-1 my-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700 " />
+        <Link to="/" className="text-black mr-1 hover:text-red-600" title="Go Back">
+          <i className="fa fa-xmark text-3xl px-1 my-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-red-600 " />
         </Link>
       </nav>
 
+      {/* <div className="">
+        <Await promise={ytResults} fallback="loading...">
+          {(data) => {
+            return (
+            <>
+              <iframe className="absolute top-1 left-1 bg-red-600" src={`https://www.youtube.com/embed/${data![0].id?.videoId}`}></iframe>
+            </>
+            )
+          }}
+        </Await>
+      </div> */}
+      
       <div className="w-full pl-2 pr-4 max-h-screen overflow-y-auto bg-gray-400">
         <Await promise={pdfUrl} fallback="loading...">
           {(data) => {
