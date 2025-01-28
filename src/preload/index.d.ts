@@ -25,7 +25,7 @@ declare global {
 
       youtubeSearchResults: (
         query: string,
-      ) => Promise<Array<youtube_v3.Schema$SearchResult> | undefined>;
+      ) => Promise<Array<youtube_v3.Schema$Video> | undefined>;
     };
   }
 }

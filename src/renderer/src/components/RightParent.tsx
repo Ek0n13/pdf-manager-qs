@@ -130,9 +130,9 @@ function PdfsList() {
   const openPdfOnClick = (fileName: string | null) => {
     setLastViewed(fileName);
 
-    setTimeout(() => {
-      window.api.fileYTSearch(fileName!);
-    }, 1000);
+    // setTimeout(() => {
+    //   window.api.fileYTSearch(fileName!);
+    // }, 1000);
   };
 
   const removeHighlight = () => {

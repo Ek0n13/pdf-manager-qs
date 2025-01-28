@@ -143,17 +143,8 @@ app.whenReady().then(() => {
   );
 
   ipcMain.on("file-yt-search", (_event, fileName: string) => {
-    const strippedFileName = pathParse(fileName).name.trim();
-
-    const searchString = strippedFileName
-      .replace(/&/g, "%26")
-      .replace(/\'/g, "")
-      .replace(/\"/g, "")
-      .replace(/ /g, "+")
-      .trim();
-
+    const searchString = createSearchString(fileName, "+");
     const finalUrl = `https://www.youtube.com/results?search_query=${searchString}+hq`;
-
     openInEdge(finalUrl);
   });
 
@@ -209,8 +200,9 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle("youtube-search-results", async (_event, query) => {
+  ipcMain.handle("youtube-search-results", async (_event, fileName) => {
     try {
+      const query = `${createSearchString(fileName, " ")} hq`;
       const response = await youtubeSearchResults(query);
       return response;
     } catch (error) {
@@ -230,6 +222,19 @@ app.on("window-all-closed", () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+function createSearchString(fileName: string, delimiter: string): string {
+  const strippedFileName = pathParse(fileName).name.trim();
+
+  const searchString = strippedFileName
+    .replace(/&/g, "%26")
+    .replace(/\'/g, "")
+    .replace(/\"/g, "")
+    .replace(/ /g, delimiter)
+    .trim();
+
+  return searchString;
+}
+
 function saveLastPlayed(fileName: string | null, data: string): boolean {
   const file = pathJoin(createLastPlayedDir(), fileName || "tattos.txt");
 
@@ -345,8 +350,7 @@ function createLastPlayedDir(): string {
 
 async function youtubeSearchResults(
   query: string,
-): Promise<Array<youtube_v3.Schema$SearchResult> | undefined> {
-  console.log(process.env);
+): Promise<Array<youtube_v3.Schema$Video> | undefined> {
   const youtube = google.youtube({
     version: "v3",
     auth: import.meta.env["VITE_YOUTUBE_API_KEY"],
@@ -358,5 +362,10 @@ async function youtubeSearchResults(
     maxResults: 10,
   });
 
-  return response.data.items;
+  const videoList = await youtube.videos.list({
+    part: ["snippet", "contentDetails"],
+    id: response.data.items?.map((value) => value.id?.videoId ?? ""),
+  });
+
+  return videoList.data.items;
 }

@@ -6,14 +6,12 @@ export const Route = createFileRoute("/view/$path")({
   loader: async ({ params }) => {
     try {
       const newPath = decodeURIComponent(params.path);
-      const pdfSlow = getPdfSlow(newPath);
+      
+      const url = getPdfUrl(newPath);
+      const fileName = getFileName(newPath);
+      const results = getYtResults(newPath);
 
-      const fileName = returnString(newPath);
-
-      // use the results from loader by querying the fileName
-      // const yt = youtubeSearchResults(filename);
-
-      return { pdfUrl: pdfSlow, pdfFileName: fileName };
+      return { pdfUrl: url, pdfFileName: fileName, ytResults: results };
     } catch (error) {
       throw error;
     }
@@ -21,7 +19,7 @@ export const Route = createFileRoute("/view/$path")({
   component: ViewPdf,
 });
 
-async function getPdfSlow(path: string) {
+async function getPdfUrl(path: string) {
   const buffer: Buffer = await window.api.getPdfFile(path);
   const blob = new Blob([buffer], {type: "application/pdf"});
   const url = window.URL.createObjectURL(blob);
@@ -31,22 +29,22 @@ async function getPdfSlow(path: string) {
   });
 }
 
-async function returnString(param: string) {
+async function getFileName(param: string) {
   return new Promise<string>((resolve) => {
     resolve(param);
   });
 }
 
-async function youtubeSearchResults(query: string) {
+async function getYtResults(query: string) {
   const ytResults = await window.api.youtubeSearchResults(query);
 
-  return new Promise<Array<youtube_v3.Schema$SearchResult> | undefined>((resolve) => {
+  return new Promise<Array<youtube_v3.Schema$Video> | undefined>((resolve) => {
     resolve(ytResults);
   })
 }
 
 function ViewPdf(): JSX.Element {
-  const { pdfUrl, pdfFileName } = Route.useLoaderData();
+  const { pdfUrl, pdfFileName, ytResults } = Route.useLoaderData();
 
   const [windowSize, setWindowSize] = useState<{
     width: number;
@@ -55,6 +53,8 @@ function ViewPdf(): JSX.Element {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  const [frameKey, setFrameKey] = useState<string>("-1");
 
   useEffect(() => {
     const handleResize = () => {
@@ -81,11 +81,88 @@ function ViewPdf(): JSX.Element {
   const handleShowModal = async (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
 
-    const ytResults = await window.api.youtubeSearchResults("subtact step up");
-    console.log(ytResults);
-
     const element = document.getElementById("youtube-search-modal");
     element?.classList.toggle("opacity-0");
+  };
+
+  const handleGoToVideo = (event: React.MouseEvent<HTMLAnchorElement>, videoId: string) => {
+    event?.preventDefault();
+
+    const ytLink = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    setFrameParams(ytLink, videoId);
+    switchResultsVideo();
+  };
+
+  // const handleGoToResults = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  //   switchResultsVideo();
+  // };
+
+  function formatDuration(isoDuration: string): string {
+    if (!isoDuration || isoDuration === "null") return "<error>";
+
+    const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return "<error>";
+
+    const hh = String(match[1] || 0).padStart(2, "0");
+    const mm = String(match[2] || 0).padStart(2, "0");
+    const ss = String(match[3] || 0).padStart(2, "0");
+
+    return `${hh === "00" ? "" : hh + ":"}${mm}:${ss}`;
+  }
+
+  function timeAgo(isoDate: string): string {
+    if (!isoDate || isoDate === "null") return "<error>";
+
+    const date = new Date(isoDate);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+    const seconds = diffInSeconds;
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+  
+    if (seconds < 60) {
+      return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+    } else if (minutes < 60) {
+      return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    } else if (hours < 24) {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    } else if (days < 30) {
+      return `${days} day${days !== 1 ? 's' : ''} ago`;
+    } else if (months < 12) {
+      return `${months} month${months !== 1 ? 's' : ''} ago`;
+    } else {
+      return `${years} year${years !== 1 ? 's' : ''} ago`;
+    }
+  }
+
+  function switchResultsVideo() {
+    const results = document.getElementById("youtube-results-list");
+    const video = document.getElementById("youtube-video-container");
+
+    if (!results || !video) return;
+
+    results.classList.toggle("hidden");
+
+    if (results?.classList.contains("hidden")) {
+      video.classList.remove("hidden");
+      video.classList.add("inline-block");
+    } else {
+      video.classList.remove("inline-block");
+      video.classList.add("hidden");
+    }
+  }
+
+  function setFrameParams(src: string = "about:blank", key: string = "-1") {
+    const videoFrame = document.getElementById("youtube-video-frame") as HTMLIFrameElement;
+
+    if (!videoFrame) return;
+
+    setFrameKey(key);
+    videoFrame.src = src;
   }
 
   return (
@@ -121,24 +198,60 @@ function ViewPdf(): JSX.Element {
         </Link>
       </nav>
 
-      <div id="youtube-search-modal" className="opacity-0 bg-gray-200 shadow-xl border-solid border-black border-2">
-        <span className="text-black">hello</span>
-          {/* <Await promise={ytResults} fallback="loading...">
-            {(data) => {
-              
-
-              return (
+      <div
+        id="youtube-search-modal"
+        className="opacity-0 bg-gray-200 shadow-xl border-solid border-black border-2"
+      >
+        {/* <span className="text-black">hello</span> */}
+        <Await promise={ytResults} fallback="loading...">
+          {(data) => {
+            return (
               <>
-                <iframe className="absolute top-1 left-1 bg-red-600" src={`https://www.youtube.com/embed/${data![0].id?.videoId}`}></iframe>
-              </>
-              )
-            }}
-          </Await> */}
+                <ul
+                  id="youtube-results-list"
+                  className="max-h-[90vh] w-full overflow-y-auto overflow-x-hidden divide-y divide-black"
+                >
+                  {data?.map((value, index) => (
+                    <li key={`video-${index}`}>
+                      <a
+                        href="#"
+                        className="flex flex-row p-2 font-normal hover:bg-black hover:bg-opacity-20"
+                        onClick={(event) => handleGoToVideo(event, value.id ?? "")}
+                      >
+                        <div className="relative inline-block">
+                          <img src={value.snippet?.thumbnails?.default?.url ?? ""} alt="No thumbnail"/>
+                          <span className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-sm px-1 rounded-sm">{formatDuration(value.contentDetails?.duration ?? "")}</span>
+                        </div>
+                        <div className="p-2 flex flex-col text-black justify-center">
+                          <span>{value.snippet?.title}</span>
+                          <span>{`${value.snippet?.channelTitle} • ${timeAgo(value.snippet?.publishedAt ?? "")}`}</span>
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                
+            </>
+            )
+          }}
+        </Await>
+        <div 
+          id="youtube-video-container"
+          className="max-h-[90vh] w-full hidden"
+        >
+          <div className=" w-full border-black border-b-4">
+            <a href="#" className="absolute top-2 left-2">hello</a>
+          </div>
+          <iframe
+            id="youtube-video-frame"
+            className="absolute left-1/2 border-black border-4"
+            key={frameKey}
+            src="about:blank"
+          ></iframe>
         </div>
+      </div>
       
       <div className="w-full">
-        
-
         <div className="w-full pl-2 pr-4 max-h-screen overflow-y-auto bg-gray-400">
           <Await promise={pdfUrl} fallback="loading...">
             {(data) => {
