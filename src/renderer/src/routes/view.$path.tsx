@@ -297,7 +297,7 @@ function ViewPdf(): JSX.Element {
           <div className="flex items-center justify-center">
             <iframe
               ref={iframeRef}
-              className="p-2 w-[36vw] h-[28vh]"
+              className="p-2 w-[93%] h-[28vh]"
               src="about:blank"
             ></iframe>
           </div>
