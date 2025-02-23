@@ -65,7 +65,9 @@ function LeftParent(props: { className: string }): JSX.Element {
         id="current-foler-w-search"
         className={`${parentDirectory ? "" : "hidden"}`}
       >
-        <pre className="text-center">{"Parent Folder: " + parentFolder}</pre>
+        <pre className="text-center truncate p-4">
+          {"Parent Folder: " + parentFolder}
+        </pre>
         <input
           type="search"
           placeholder="Search..."
@@ -102,7 +104,9 @@ function DirectoriesList() {
     const fileList = await window.api.readDirectory(activeDir!);
 
     // ** REMOVE THIS **
-    const x: string[] = Array(Math.ceil(multItems / 4)).fill(fileList).flat();
+    const x: string[] = Array(Math.ceil(multItems / 4))
+      .fill(fileList)
+      .flat();
     // ** REMOVE THIS **
 
     setPdfsList(x);

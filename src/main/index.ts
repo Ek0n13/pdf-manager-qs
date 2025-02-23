@@ -29,7 +29,7 @@ function createWindow() {
 
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
-    // mainWindow.maximize();
+    mainWindow.maximize();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -44,6 +44,28 @@ function createWindow() {
   } else {
     mainWindow.loadFile(pathJoin(__dirname, `../renderer/index.html`));
   }
+
+  mainWindow.on("close", (event) => {
+    // const dialogResult = dialog.showOpenDialogSync({
+    //   type: "question",
+    //   buttons: ["Yes", "No"],
+    //   title: "Confirm",
+    //   message: "Are you sure you want to quit?",
+    // });
+
+    const dialogResult = dialog.showMessageBoxSync({
+      message: "Are you sure you want to quit?",
+
+      type: "question",
+      buttons: ["Yes", "No"],
+      defaultId: 0,
+      cancelId: 1,
+      title: "Confirm",
+    });
+    if (dialogResult !== 0) {
+      event.preventDefault();
+    }
+  });
 }
 
 // This method will be called when Electron has finished
@@ -360,6 +382,8 @@ async function youtubeSearchResults(
     part: ["snippet"],
     q: query,
     maxResults: 10,
+    type: ["video"],
+    videoEmbeddable: "true",
   });
 
   const videoList = await youtube.videos.list({

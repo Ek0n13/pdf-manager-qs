@@ -28,6 +28,7 @@
     "@tanstack/react-router": "^1.97.14",
     "electron-updater": "^6.3.9",
     "googleapis": "^144.0.0",
+    "youtube-dl-exec": "^3.0.13",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -57,7 +58,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "electron",
-      "esbuild"
+      "esbuild",
+      "youtube-dl-exec"
     ]
   }
 }

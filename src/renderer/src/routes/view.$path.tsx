@@ -1,6 +1,7 @@
 import { createFileRoute, Await, Link } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { youtube_v3 } from "googleapis";
+// import { youtubeDl } from "youtube-dl-exec";
 
 export const Route = createFileRoute("/view/$path")({
   loader: async ({ params }) => {
@@ -36,10 +37,11 @@ async function getFileName(param: string) {
 }
 
 async function getYtResults(query: string) {
-  const ytResults = await window.api.youtubeSearchResults(query);
+  // const ytResults = await window.api.youtubeSearchResults(query);
+  console.log(query);
 
   return new Promise<Array<youtube_v3.Schema$Video> | undefined>((resolve) => {
-    resolve(ytResults);
+    resolve(undefined);
   });
 }
 
@@ -56,6 +58,7 @@ function ViewPdf(): JSX.Element {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const ytVideoRef = useRef<HTMLVideoElement>(null);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -105,17 +108,23 @@ function ViewPdf(): JSX.Element {
     window.api.openFile(path, null);
   };
 
-  const handleShowModal = async (
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  // const handleShowModal = async (
+  //   event: React.MouseEvent<HTMLAnchorElement>,
+  // ) => {
+  //   event.preventDefault();
+
+  //   setIsModalOpen((prev) => !prev);
+
+  //   setTimeout(() => {
+  //     if (!modalRef.current) return;
+  //     modalRef.current.classList.toggle("opacity-0");
+  //   });
+  // };
+
+  const handleFileYTSearch = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
 
-    setIsModalOpen((prev) => !prev);
-
-    setTimeout(() => {
-      if (!modalRef.current) return;
-      modalRef.current.classList.toggle("opacity-0");
-    });
+    pdfFileName.then((value) => window.api.fileYTSearch(value));
   };
 
   const handleGoToVideo = (
@@ -124,7 +133,13 @@ function ViewPdf(): JSX.Element {
   ) => {
     event?.preventDefault();
 
-    const ytLink = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    const ytLink = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+    // youtubeDl(`https://www.youtube.com/watch?v=${videoId}`, {
+    //   format: "best",
+    // }).then((output) => {
+    //   setVideoSource(output.toString());
+    // });
+
     setFrameSource(ytLink);
     switchResultsVideo();
   };
@@ -200,6 +215,11 @@ function ViewPdf(): JSX.Element {
     iframeRef.current.src = src;
   }
 
+  // function setVideoSource(src: string = "") {
+  //   if (!ytVideoRef.current) return;
+  //   ytVideoRef.current.src = src;
+  // }
+
   return (
     <div className="w-full max-h-screen flex flex-col place-items-center">
       <nav className="sticky py-1 bg-gray-200 shadow shadow-gray-300 w-full text-black flex items-center justify-between">
@@ -223,7 +243,8 @@ function ViewPdf(): JSX.Element {
           <a
             href="#"
             className="px-2 text-black"
-            onClick={(event) => handleShowModal(event)}
+            // onClick={(event) => handleShowModal(event)}
+            onClick={(event) => handleFileYTSearch(event)}
           >
             <i className="fa-brands fa-youtube text-2xl px-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700" />
           </a>
@@ -237,72 +258,92 @@ function ViewPdf(): JSX.Element {
         </Link>
       </nav>
 
-      <div
-        ref={modalRef}
-        id="youtube-search-modal"
-        className={`${isModalOpen ? "" : "pointer-events-none"} bg-gray-200 shadow-xl border-solid border-black border-2 z-10 opacity-0`}
-      >
-        {/* <span className="text-black">hello</span> */}
-        <Await promise={ytResults} fallback="loading...">
-          {(data) => {
-            return (
-              <>
-                <ul
-                  id="youtube-results-list"
-                  className="max-h-[90vh] w-full overflow-y-auto overflow-x-hidden divide-y divide-black"
-                >
-                  {data?.map((value, index) => (
-                    <li key={`video-${index}`}>
-                      <a
-                        href="#"
-                        className="flex flex-row p-2 font-normal hover:bg-black hover:bg-opacity-20"
-                        onClick={(event) =>
-                          handleGoToVideo(event, value.id ?? "")
-                        }
-                      >
-                        <div className="relative inline-block">
-                          <img
-                            src={value.snippet?.thumbnails?.default?.url ?? ""}
-                            alt="No thumbnail"
-                          />
-                          <span className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-sm px-1 rounded-sm">
-                            {formatDuration(
-                              value.contentDetails?.duration ?? "",
-                            )}
-                          </span>
-                        </div>
-                        <div className="p-2 flex flex-col text-black justify-center">
-                          <span>{value.snippet?.title}</span>
-                          <span>{`${value.snippet?.channelTitle} • ${timeAgo(value.snippet?.publishedAt ?? "")}`}</span>
-                        </div>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            );
-          }}
-        </Await>
+      {false && (
         <div
-          id="youtube-video-container"
-          className="max-h-[90vh] w-full hidden"
+          ref={modalRef}
+          id="youtube-search-modal"
+          className={`${isModalOpen ? "" : "pointer-events-none"} bg-gray-200 shadow-xl border-solid border-black border-2 z-10 opacity-0`}
         >
-          <a
-            href="#"
-            className="absolute top-2 left-2 text-black"
-            onClick={handleGoToResults}
+          {/* <span className="text-black">hello</span> */}
+          <Await promise={ytResults} fallback="loading...">
+            {(data) => {
+              return (
+                <>
+                  <ul
+                    id="youtube-results-list"
+                    className="max-h-[90vh] w-full overflow-y-auto overflow-x-hidden divide-y divide-black"
+                  >
+                    {data?.map((value, index) => (
+                      <li key={`video-${index}`}>
+                        <a
+                          href="#"
+                          className="flex flex-row p-2 font-normal hover:bg-black hover:bg-opacity-20"
+                          onClick={(event) =>
+                            handleGoToVideo(event, value.id ?? "")
+                          }
+                        >
+                          <div className="shrink-0 relative inline-block">
+                            <img
+                              src={
+                                value.snippet?.thumbnails?.default?.url ?? ""
+                              }
+                              alt="No thumbnail"
+                            />
+                            <span className="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-sm px-1 rounded-sm">
+                              {formatDuration(
+                                value.contentDetails?.duration ?? "",
+                              )}
+                            </span>
+                          </div>
+                          <div className="p-2 w-[75%] flex flex-col text-black justify-center">
+                            <span className="truncate">
+                              {value.snippet?.title}
+                            </span>
+                            <div className="flex flex-row gap-1">
+                              <span className="truncate">
+                                {value.snippet?.channelTitle}
+                              </span>
+                              <span>{" • "}</span>
+                              <span className="truncate">
+                                {timeAgo(value.snippet?.publishedAt ?? "")}
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              );
+            }}
+          </Await>
+          <div
+            id="youtube-video-container"
+            className="max-h-[90vh] w-full hidden"
           >
-            <i className="fas fa-arrow-left text-2xl px-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700" />
-          </a>
-          <div className="flex items-center justify-center">
-            <iframe
-              ref={iframeRef}
-              className="p-2 w-[93%] h-[28vh]"
-              src="about:blank"
-            ></iframe>
+            <a
+              href="#"
+              className="absolute top-2 left-2 text-black"
+              onClick={handleGoToResults}
+            >
+              <i className="fas fa-arrow-left text-2xl px-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-blue-700" />
+            </a>
+            <div className="flex flex-col gap-2 items-center justify-center">
+              <iframe
+                ref={iframeRef}
+                className="p-2 w-[93%] h-[28vh]"
+                src="about:blank"
+              ></iframe>
+              <video
+                ref={ytVideoRef}
+                className="border-black border-solid border-2"
+                src=""
+                controls
+              ></video>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="w-full">
         <div className="w-full pl-2 pr-4 max-h-screen overflow-y-auto bg-gray-400">
@@ -318,7 +359,7 @@ function ViewPdf(): JSX.Element {
                     itemType="application/pdf"
                     className="p-2 w-full"
                     style={{
-                      height: `${Math.floor(windowSize.height * 0.95)}px`,
+                      height: `${Math.floor(windowSize.height * 0.94)}px`,
                     }}
                   ></embed>
                 </div>
