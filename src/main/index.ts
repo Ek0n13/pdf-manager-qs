@@ -4,6 +4,7 @@ import { join as pathJoin, parse as pathParse } from "path";
 import { exec } from "child_process";
 import * as fs from "fs";
 import { google, youtube_v3 } from "googleapis";
+// import * as oc from "./oracle-client.js";
 
 import icon from "../../resources/icon.png?asset";
 
@@ -72,6 +73,14 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // oc.testDb().then((res) => {
+  //   dialog.showMessageBoxSync({
+  //     message: res ?? "",
+  //     type: "error",
+  //     title: "Error!",
+  //   });
+  // });
+
   // Set app user model id for windows
   electronApp.setAppUserModelId("com.electron");
 
