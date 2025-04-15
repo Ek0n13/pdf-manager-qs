@@ -62,7 +62,11 @@
     "onlyBuiltDependencies": [
       "electron",
       "esbuild",
+      "oracledb",
       "youtube-dl-exec"
+    ],
+    "ignoredBuiltDependencies": [
+      "es5-ext"
     ]
   }
 }

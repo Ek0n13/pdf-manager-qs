@@ -49,6 +49,7 @@ function RootRender(): React.ReactNode {
   //Right Parent
   const [lastPlayed, setLastPlayed] = useState<string | null>(null);
   const [lastViewed, setLastViewed] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<dbUser["ID"] | null>(null);
 
   const appContext = {
     activeDirectory,
@@ -67,6 +68,9 @@ function RootRender(): React.ReactNode {
     setLastPlayed,
     lastViewed,
     setLastViewed,
+
+    currentUserId,
+    setCurrentUserId,
   };
 
   return (

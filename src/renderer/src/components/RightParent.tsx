@@ -1,12 +1,25 @@
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useRef, useState } from "react";
 import { AppContext } from "@renderer/contexts/AppContext";
+import Loader from "./Loader";
 
 const route = getRouteApi("/");
 
 function RightParent(props: { className: string }): JSX.Element {
-  const { activeDirectory, pdfsList, lastPlayed, setLastPlayed, lastViewed } =
-    useContext(AppContext);
+  const [loading, setLoading] = useState<Boolean>(false);
+
+  const {
+    activeDirectory,
+    pdfsList,
+    lastPlayed,
+    setLastPlayed,
+    lastViewed,
+    setCurrentUserId,
+  } = useContext(AppContext);
+
+  const [dbUserList, setDbUserList] = useState<dbUser[]>([]);
+
+  const userLastPlayedDialogRef = useRef<HTMLDialogElement>(null);
 
   const navigate = route.useNavigate();
 
@@ -40,12 +53,71 @@ function RightParent(props: { className: string }): JSX.Element {
   ) => {
     event.preventDefault();
 
-    const content = await window.api.readTextFile(null);
-    setLastPlayed(content);
+    userLastPlayedDialogRef.current?.showModal();
+
+    setLoading(true);
+    const getUsers: dbUser[] = await window.api.dbGetUsers();
+    setDbUserList(getUsers);
+    setLoading(false);
+  };
+
+  const outsideClick = (event: React.MouseEvent<HTMLDialogElement>) => {
+    const dialog = userLastPlayedDialogRef.current;
+    if (dialog && event.target === dialog) {
+      dialog.close();
+    }
+  };
+
+  const handleGetUserLastPlayed = async (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    userId: dbUser["ID"],
+  ) => {
+    event.preventDefault();
+    setLoading(true);
+
+    const lastPlayed: dbUserLastPlayed =
+      await window.api.dbGetUserLastPlayed(userId);
+    console.log("lastPlayed.LAST_PLAYED: ", lastPlayed.LAST_PLAYED);
+    setLastPlayed(lastPlayed.LAST_PLAYED);
+    setCurrentUserId(userId);
+
+    const dialog = userLastPlayedDialogRef.current;
+    dialog?.close();
+    setLoading(false);
   };
 
   return (
     <div id="pdfs-list" className={props.className}>
+      <dialog
+        ref={userLastPlayedDialogRef}
+        onClick={(event) => outsideClick(event)}
+        className="min-w-[280px] max-w-[580px] w-2/5 h-1/3 border-solid border-2 border-black bg-gray-200 rounded-md"
+      >
+        <div className="p-4 w-full h-full max-h-full overflow-y-auto">
+          <div className="flex justify-between items-center gap-2">
+            <input type="text" className="h-8" />
+            <button className="w-32">Add User</button>
+          </div>
+          {loading && <Loader />}
+          {!loading && (
+            <ul className="w-full divide-y divide-black text-black">
+              {dbUserList.map((value, index) => (
+                <li key={`ch-${index}`} className="p-1 flex justify-center">
+                  <a
+                    href="#"
+                    onClick={(event) =>
+                      handleGetUserLastPlayed(event, value.ID)
+                    }
+                  >
+                    {value.NAME}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </dialog>
+
       <div className={`flex flex-col ${activeDirectory ? "" : "hidden"}`}>
         <pre
           id="current-folder-info"
@@ -84,6 +156,7 @@ function PdfsList() {
   const {
     activeDirectory,
     pdfsList,
+    currentUserId,
     setPdfsList,
     setLastViewed,
     setLastPlayed,
@@ -91,15 +164,31 @@ function PdfsList() {
 
   const { pdfName } = route.useSearch();
 
-  const handleSaveLastPlayed = async (
+  // const handleSaveLastPlayed = async (
+  //   event: React.MouseEvent<HTMLAnchorElement>,
+  //   fileName: string | null,
+  //   data: string,
+  // ) => {
+  //   event.preventDefault();
+
+  //   const isSaved = await window.api.saveLastPlayedAsync(fileName, data);
+  //   if (isSaved) setLastPlayed(data);
+  // };
+
+  const handleDbSaveLastPlayed = async (
     event: React.MouseEvent<HTMLAnchorElement>,
-    fileName: string | null,
-    data: string,
+    lastPlayed: dbUserLastPlayed["LAST_PLAYED"],
   ) => {
     event.preventDefault();
 
-    const isSaved = await window.api.saveLastPlayedAsync(fileName, data);
-    if (isSaved) setLastPlayed(data);
+    console.log("currentUserId: ", currentUserId);
+    console.log("lastPlayed: ", lastPlayed);
+
+    const isSaved = await window.api.dbSaveLastPlayedAsync(
+      currentUserId,
+      lastPlayed,
+    );
+    if (isSaved) setLastPlayed(lastPlayed);
   };
 
   // const handleYTSearch = (
@@ -174,11 +263,19 @@ function PdfsList() {
                 >
                   <i className="fas fa-file-pdf text-xl" />
                 </Link>
-                <a
+                {/* <a
                   href="#"
                   className="mr-4"
                   title="Save Last Played"
                   onClick={(event) => handleSaveLastPlayed(event, null, value)}
+                >
+                  <i className="fas fa-floppy-disk text-xl" />
+                </a> */}
+                <a
+                  href="#"
+                  className="mr-4"
+                  title="Save Last Played"
+                  onClick={(event) => handleDbSaveLastPlayed(event, value)}
                 >
                   <i className="fas fa-floppy-disk text-xl" />
                 </a>

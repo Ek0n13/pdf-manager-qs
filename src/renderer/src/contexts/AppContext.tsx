@@ -14,6 +14,8 @@ type RightParentContextType = {
   setLastPlayed: React.Dispatch<React.SetStateAction<string | null>>;
   lastViewed: string | null;
   setLastViewed: React.Dispatch<React.SetStateAction<string | null>>;
+  currentUserId: dbUser["ID"] | null;
+  setCurrentUserId: React.Dispatch<React.SetStateAction<dbUser["ID"] | null>>;
 };
 
 type AppContextType = {

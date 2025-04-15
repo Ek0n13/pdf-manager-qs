@@ -19,7 +19,7 @@
   margin: 1rem auto;
 }
 
-#main-container input[type="search"] {
+#main-container input {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   padding-left: 0.75rem;
@@ -59,7 +59,7 @@
 }
 
 @media (prefers-color-scheme: light) {
-  input[type="search"] {
+  input {
     background-color: white;
     color: black;
   }

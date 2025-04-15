@@ -4,7 +4,7 @@ import { join as pathJoin, parse as pathParse } from "path";
 import { exec } from "child_process";
 import * as fs from "fs";
 import { google, youtube_v3 } from "googleapis";
-// import * as oc from "./oracle-client.js";
+import * as db from "./oracle-client.js";
 
 import icon from "../../resources/icon.png?asset";
 
@@ -73,14 +73,6 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // oc.testDb().then((res) => {
-  //   dialog.showMessageBoxSync({
-  //     message: res ?? "",
-  //     type: "error",
-  //     title: "Error!",
-  //   });
-  // });
-
   // Set app user model id for windows
   electronApp.setAppUserModelId("com.electron");
 
@@ -213,7 +205,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     "save-last-played-async",
-    (_event, fileName: string | null, data: string) => {
+    async (_event, fileName: string | null, data: string) => {
       try {
         return saveLastPlayed(fileName, data);
       } catch (error) {
@@ -240,6 +232,58 @@ app.whenReady().then(() => {
       throw new Error("Error getting youtube search results: " + error);
     }
   });
+
+  // db related funcs
+  ipcMain.on("db-add-user", async (_event, name) => {
+    try {
+      db.addUser(name);
+    } catch (error) {
+      throw new Error("Error adding user: " + error);
+    }
+  });
+
+  ipcMain.on("db-delete-user", async (_event, id) => {
+    try {
+      db.deleteUser(id);
+    } catch (error) {
+      throw new Error("Error deleting user: " + error);
+    }
+  });
+
+  ipcMain.handle("db-get-users", async (_event) => {
+    try {
+      return db.getUsers();
+    } catch (error) {
+      throw new Error("Error getting users: " + error);
+    }
+  });
+
+  ipcMain.on("db-add-user-last-played", async (_event, userId, lastPlayed) => {
+    try {
+      db.addUserLastPlayed(userId, lastPlayed);
+    } catch (error) {
+      throw new Error("Error adding user: " + error);
+    }
+  });
+
+  ipcMain.handle("db-get-user-last-played", async (_event, id) => {
+    try {
+      return db.getUserLastPlayed(id);
+    } catch (error) {
+      throw new Error("Error getting users: " + error);
+    }
+  });
+
+  ipcMain.handle(
+    "db-save-last-played-async",
+    async (_event, userId: number | null, lastPlayed: string) => {
+      try {
+        return dbSaveLastPlayed(userId, lastPlayed);
+      } catch (error) {
+        throw new Error("Error saving last played (db): " + error);
+      }
+    },
+  );
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -281,6 +325,36 @@ function saveLastPlayed(fileName: string | null, data: string): boolean {
 
   if (result === 0) {
     fs.writeFileSync(file, data);
+    return true;
+  }
+
+  return false;
+}
+
+function dbSaveLastPlayed(userId: number | null, lastPlayed: string): boolean {
+  if (!userId) {
+    dialog.showMessageBoxSync({
+      message: "Select current user first.",
+
+      type: "error",
+      title: "Error!",
+    });
+
+    return false;
+  }
+
+  const result = dialog.showMessageBoxSync({
+    message: "Save last played?",
+
+    type: "question",
+    buttons: ["Yes", "No"],
+    defaultId: 0,
+    cancelId: 1,
+    title: "Confirm Action",
+  });
+
+  if (result === 0) {
+    db.addUserLastPlayed(userId, lastPlayed);
     return true;
   }
 

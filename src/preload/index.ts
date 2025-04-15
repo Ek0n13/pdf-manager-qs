@@ -29,6 +29,16 @@ const api = {
 
   youtubeSearchResults: (query: string) =>
     ipcRenderer.invoke("youtube-search-results", query),
+
+  dbAddUser: (name: string) => ipcRenderer.send("db-add-user", name),
+  dbDeleteUser: (id: number) => ipcRenderer.send("db-delete-user", id),
+  dbGetUsers: () => ipcRenderer.invoke("db-get-users"),
+  dbAddUserLastPlayed: (userId: number, lastPlayed: string) =>
+    ipcRenderer.send("db-add-user-last-played", userId, lastPlayed),
+  dbGetUserLastPlayed: (id: number) =>
+    ipcRenderer.invoke("db-get-user-last-played", id),
+  dbSaveLastPlayedAsync: (userId: number | null, lastPlayed: string) =>
+    ipcRenderer.invoke("db-save-last-played-async", userId, lastPlayed),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to
