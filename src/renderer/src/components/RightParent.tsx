@@ -18,6 +18,7 @@ function RightParent(props: { className: string }): JSX.Element {
   } = useContext(AppContext);
 
   const [dbUserList, setDbUserList] = useState<dbUser[]>([]);
+  const [userNameToAdd, setUserNameToAdd] = useState<dbUser["NAME"]>("");
 
   const userLastPlayedDialogRef = useRef<HTMLDialogElement>(null);
 
@@ -48,17 +49,22 @@ function RightParent(props: { className: string }): JSX.Element {
     scrollToElement(fileName, true);
   };
 
-  const handleReadTextFile = async (
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
-    event.preventDefault();
-
-    userLastPlayedDialogRef.current?.showModal();
-
-    setLoading(true);
+  const getUsers = async () => {
     const getUsers: dbUser[] = await window.api.dbGetUsers();
     setDbUserList(getUsers);
+  };
+  const getUsersLoader = async () => {
+    setLoading(true);
+    await getUsers();
     setLoading(false);
+  };
+
+  const handleGetUsers = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+
+    setUserNameToAdd("");
+    userLastPlayedDialogRef.current?.showModal();
+    await getUsersLoader();
   };
 
   const outsideClick = (event: React.MouseEvent<HTMLDialogElement>) => {
@@ -70,19 +76,46 @@ function RightParent(props: { className: string }): JSX.Element {
 
   const handleGetUserLastPlayed = async (
     event: React.MouseEvent<HTMLAnchorElement>,
-    userId: dbUser["ID"],
+    userId: dbUserLastPlayed["ID"],
   ) => {
     event.preventDefault();
     setLoading(true);
 
     const lastPlayed: dbUserLastPlayed =
       await window.api.dbGetUserLastPlayed(userId);
-    console.log("lastPlayed.LAST_PLAYED: ", lastPlayed.LAST_PLAYED);
     setLastPlayed(lastPlayed.LAST_PLAYED);
     setCurrentUserId(userId);
 
     const dialog = userLastPlayedDialogRef.current;
     dialog?.close();
+    setLoading(false);
+  };
+
+  const handleAddUser = async () => {
+    if (userNameToAdd === "" || !userNameToAdd.trim()) return;
+    setLoading(true);
+
+    await window.api.dbAddUser(userNameToAdd);
+    await getUsers();
+
+    setUserNameToAdd("");
+    setLoading(false);
+  };
+
+  const handleDeleteUser = async (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    userId: dbUser["ID"],
+  ) => {
+    event.preventDefault();
+
+    setLoading(true);
+    const isDeleted: boolean = await window.api.dbDeleteUser(userId);
+    if (!isDeleted) {
+      setLoading(false);
+      return;
+    }
+
+    await getUsers();
     setLoading(false);
   };
 
@@ -95,21 +128,37 @@ function RightParent(props: { className: string }): JSX.Element {
       >
         <div className="p-4 w-full h-full max-h-full overflow-y-auto">
           <div className="flex justify-between items-center gap-2">
-            <input type="text" className="h-8" />
-            <button className="w-32">Add User</button>
+            <input
+              type="text"
+              className="h-8"
+              value={userNameToAdd}
+              onChange={(e) => setUserNameToAdd(e.target.value)}
+              placeholder="Type user name to add..."
+            />
+            <button className="w-32" onClick={handleAddUser}>
+              Add User
+            </button>
           </div>
           {loading && <Loader />}
           {!loading && (
             <ul className="w-full divide-y divide-black text-black">
               {dbUserList.map((value, index) => (
-                <li key={`ch-${index}`} className="p-1 flex justify-center">
+                <li key={`ch-${index}`} className="p-1 flex justify-between">
                   <a
                     href="#"
+                    key={"user-" + value.ID}
                     onClick={(event) =>
                       handleGetUserLastPlayed(event, value.ID)
                     }
                   >
                     {value.NAME}
+                  </a>
+                  <a
+                    href="#"
+                    key={"delete-user-" + value.ID}
+                    onClick={(event) => handleDeleteUser(event, value.ID)}
+                  >
+                    <i className="fas fa-trash text-xl" />
                   </a>
                 </li>
               ))}
@@ -134,7 +183,7 @@ function RightParent(props: { className: string }): JSX.Element {
               {lastPlayed || "<none>"}
             </a>
             <span className="mx-2">|</span>
-            <a href="#" onClick={(event) => handleReadTextFile(event)}>
+            <a href="#" onClick={(event) => handleGetUsers(event)}>
               <i className="fas fa-download text-lg" />
             </a>
           </div>
@@ -181,13 +230,8 @@ function PdfsList() {
   ) => {
     event.preventDefault();
 
-    console.log("currentUserId: ", currentUserId);
-    console.log("lastPlayed: ", lastPlayed);
-
-    const isSaved = await window.api.dbSaveLastPlayedAsync(
-      currentUserId,
-      lastPlayed,
-    );
+    const userId = currentUserId?.valueOf() as dbUserLastPlayed["ID"];
+    const isSaved = await window.api.dbSaveLastPlayedAsync(userId, lastPlayed);
     if (isSaved) setLastPlayed(lastPlayed);
   };
 

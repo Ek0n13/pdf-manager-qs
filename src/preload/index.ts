@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
+import { User, UserLastPlayed } from "../main/oracle-client.js";
 
 // Custom APIs for renderer
 const api = {
@@ -30,15 +31,18 @@ const api = {
   youtubeSearchResults: (query: string) =>
     ipcRenderer.invoke("youtube-search-results", query),
 
-  dbAddUser: (name: string) => ipcRenderer.send("db-add-user", name),
-  dbDeleteUser: (id: number) => ipcRenderer.send("db-delete-user", id),
-  dbGetUsers: () => ipcRenderer.invoke("db-get-users"),
-  dbAddUserLastPlayed: (userId: number, lastPlayed: string) =>
-    ipcRenderer.send("db-add-user-last-played", userId, lastPlayed),
-  dbGetUserLastPlayed: (id: number) =>
-    ipcRenderer.invoke("db-get-user-last-played", id),
-  dbSaveLastPlayedAsync: (userId: number | null, lastPlayed: string) =>
+  dbAddUser: (name: User["NAME"]): Promise<void> =>
+    ipcRenderer.invoke("db-add-user", name),
+  dbDeleteUser: (id: User["ID"]): Promise<boolean> =>
+    ipcRenderer.invoke("db-delete-user", id),
+  dbGetUsers: (): Promise<User[]> => ipcRenderer.invoke("db-get-users"),
+  dbSaveLastPlayedAsync: (
+    userId: UserLastPlayed["ID"],
+    lastPlayed: UserLastPlayed["LAST_PLAYED"],
+  ): Promise<boolean> =>
     ipcRenderer.invoke("db-save-last-played-async", userId, lastPlayed),
+  dbGetUserLastPlayed: (id: UserLastPlayed["ID"]): Promise<UserLastPlayed> =>
+    ipcRenderer.invoke("db-get-user-last-played", id),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -60,7 +60,7 @@ async function oracleConnection(): Promise<OracleDB.Connection | null> {
   }
 }
 
-export const addUser = async (name: string) => {
+export const addUser = async (name: User["NAME"]): Promise<void> => {
   const cn = await oracleConnection();
   if (!cn) return;
 
@@ -75,7 +75,7 @@ export const addUser = async (name: string) => {
   cn.close;
 };
 
-export const deleteUser = async (id: number) => {
+export const deleteUser = async (id: User["ID"]): Promise<void> => {
   const cn = await oracleConnection();
   if (!cn) return;
 
@@ -101,7 +101,10 @@ export const getUsers = async (): Promise<User[] | undefined> => {
   return result.rows;
 };
 
-export const addUserLastPlayed = async (userId: number, lastPlayed: string) => {
+export const addUserLastPlayed = async (
+  userId: UserLastPlayed["ID"],
+  lastPlayed: UserLastPlayed["LAST_PLAYED"],
+) => {
   const cn = await oracleConnection();
   if (!cn) return;
 
@@ -125,7 +128,7 @@ export const addUserLastPlayed = async (userId: number, lastPlayed: string) => {
 };
 
 export const getUserLastPlayed = async (
-  id: number,
+  userId: UserLastPlayed["ID"],
 ): Promise<UserLastPlayed | undefined> => {
   const cn = await oracleConnection();
   if (!cn) return undefined;
@@ -135,7 +138,7 @@ export const getUserLastPlayed = async (
     "select t.* from table(api.get_user_last_played(:p_user_id)) t",
     {
       p_user_id: {
-        val: id,
+        val: userId,
         dir: OracleDB.BIND_IN,
         type: OracleDB.NUMBER,
       },

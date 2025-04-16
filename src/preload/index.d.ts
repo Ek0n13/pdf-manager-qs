@@ -30,15 +30,18 @@ declare global {
         query: string,
       ) => Promise<Array<youtube_v3.Schema$Video> | undefined>;
 
-      dbAddUser: (name: string) => void;
-      dbDeleteUser: (id: number) => void;
+      dbAddUser: (name: User["NAME"]) => Promise<void>;
+      dbDeleteUser: (id: User["ID"]) => Promise<boolean>;
       dbGetUsers: () => Promise<User[]>;
-      dbAddUserLastPlayed: (userId: number, lastPlayed: string) => void;
-      dbGetUserLastPlayed: (id: number) => Promise<UserLastPlayed>;
       dbSaveLastPlayedAsync: (
-        userId: number | null,
-        lastPlayed: string,
+        userId: UserLastPlayed["ID"],
+        lastPlayed: UserLastPlayed["LAST_PLAYED"],
       ) => Promise<boolean>;
+      dbGetUserLastPlayed: (
+        id: UserLastPlayed["ID"],
+      ) => Promise<UserLastPlayed>;
     };
   }
 }
+
+export {};

@@ -234,53 +234,61 @@ app.whenReady().then(() => {
   });
 
   // db related funcs
-  ipcMain.on("db-add-user", async (_event, name) => {
-    try {
-      db.addUser(name);
-    } catch (error) {
-      throw new Error("Error adding user: " + error);
-    }
-  });
+  ipcMain.handle(
+    "db-add-user",
+    async (_event, name: db.User["NAME"]): Promise<void> => {
+      try {
+        await db.addUser(name);
+      } catch (error) {
+        throw new Error("Error adding user: " + error);
+      }
+    },
+  );
 
-  ipcMain.on("db-delete-user", async (_event, id) => {
-    try {
-      db.deleteUser(id);
-    } catch (error) {
-      throw new Error("Error deleting user: " + error);
-    }
-  });
+  ipcMain.handle(
+    "db-delete-user",
+    async (_event, id: db.User["ID"]): Promise<boolean> => {
+      try {
+        return await dbDeleteUser(id);
+      } catch (error) {
+        throw new Error("Error deleting user: " + error);
+      }
+    },
+  );
 
-  ipcMain.handle("db-get-users", async (_event) => {
-    try {
-      return db.getUsers();
-    } catch (error) {
-      throw new Error("Error getting users: " + error);
-    }
-  });
-
-  ipcMain.on("db-add-user-last-played", async (_event, userId, lastPlayed) => {
-    try {
-      db.addUserLastPlayed(userId, lastPlayed);
-    } catch (error) {
-      throw new Error("Error adding user: " + error);
-    }
-  });
-
-  ipcMain.handle("db-get-user-last-played", async (_event, id) => {
-    try {
-      return db.getUserLastPlayed(id);
-    } catch (error) {
-      throw new Error("Error getting users: " + error);
-    }
-  });
+  ipcMain.handle(
+    "db-get-users",
+    async (_event): Promise<db.User[] | undefined> => {
+      try {
+        return db.getUsers();
+      } catch (error) {
+        throw new Error("Error getting users: " + error);
+      }
+    },
+  );
 
   ipcMain.handle(
     "db-save-last-played-async",
-    async (_event, userId: number | null, lastPlayed: string) => {
+    async (
+      _event,
+      userId: db.UserLastPlayed["ID"],
+      lastPlayed: db.UserLastPlayed["LAST_PLAYED"],
+    ): Promise<boolean> => {
       try {
         return dbSaveLastPlayed(userId, lastPlayed);
       } catch (error) {
         throw new Error("Error saving last played (db): " + error);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "db-get-user-last-played",
+    async (_event, id): Promise<db.UserLastPlayed | undefined> => {
+      try {
+        return db.getUserLastPlayed(id);
+      } catch (error) {
+        throw new Error("Error getting users: " + error);
       }
     },
   );
@@ -331,17 +339,12 @@ function saveLastPlayed(fileName: string | null, data: string): boolean {
   return false;
 }
 
-function dbSaveLastPlayed(userId: number | null, lastPlayed: string): boolean {
-  if (!userId) {
-    dialog.showMessageBoxSync({
-      message: "Select current user first.",
-
-      type: "error",
-      title: "Error!",
-    });
-
-    return false;
-  }
+async function dbSaveLastPlayed(
+  userId: db.UserLastPlayed["ID"],
+  lastPlayed: db.UserLastPlayed["LAST_PLAYED"],
+): Promise<boolean> {
+  const lUserId = userId as number;
+  const lLastPlayed = lastPlayed as string;
 
   const result = dialog.showMessageBoxSync({
     message: "Save last played?",
@@ -354,7 +357,28 @@ function dbSaveLastPlayed(userId: number | null, lastPlayed: string): boolean {
   });
 
   if (result === 0) {
-    db.addUserLastPlayed(userId, lastPlayed);
+    await db.addUserLastPlayed(lUserId, lLastPlayed);
+    return true;
+  }
+
+  return false;
+}
+
+async function dbDeleteUser(userId: db.User["ID"]): Promise<boolean> {
+  const lUserId = userId as number;
+
+  const result = dialog.showMessageBoxSync({
+    message: "Are you sure you want to delete user?",
+
+    type: "question",
+    buttons: ["Yes", "No"],
+    defaultId: 0,
+    cancelId: 1,
+    title: "Confirm Action",
+  });
+
+  if (result === 0) {
+    await db.deleteUser(lUserId);
     return true;
   }
 
