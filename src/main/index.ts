@@ -284,9 +284,12 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     "db-get-user-last-played",
-    async (_event, id): Promise<db.UserLastPlayed | undefined> => {
+    async (
+      _event,
+      id: db.UserLastPlayed["ID"],
+    ): Promise<db.UserLastPlayed | undefined> => {
       try {
-        return db.getUserLastPlayed(id);
+        return dbGetUserLastPlayed(id);
       } catch (error) {
         throw new Error("Error getting users: " + error);
       }
@@ -362,6 +365,22 @@ async function dbSaveLastPlayed(
   }
 
   return false;
+}
+
+async function dbGetUserLastPlayed(
+  id: db.UserLastPlayed["ID"],
+): Promise<db.UserLastPlayed | undefined> {
+  const result = await db.getUserLastPlayed(id);
+  if (!result) {
+    dialog.showMessageBoxSync({
+      message: "User has no last played.",
+
+      type: "error",
+      title: "Error!",
+    });
+    return undefined;
+  }
+  return result;
 }
 
 async function dbDeleteUser(userId: db.User["ID"]): Promise<boolean> {

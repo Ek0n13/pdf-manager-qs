@@ -13,6 +13,12 @@ export type UserLastPlayed = {
   ID: number;
 };
 
+export type FileBlobs = {
+  ID: number;
+  NAME: string;
+  BLOB_DATA: Blob;
+};
+
 // export async function initPool(): Promise<void> {
 //   try {
 //     OracleDB.outFormat = OracleDB.OUT_FORMAT_OBJECT;
@@ -150,3 +156,26 @@ export const getUserLastPlayed = async (
   cn.close;
   return rr;
 };
+
+// export const uploadFile = async (
+//   userId: UserLastPlayed["ID"],
+//   lastPlayed: UserLastPlayed["LAST_PLAYED"],
+// ) => {
+//   const cn = await oracleConnection();
+//   if (!cn) return;
+
+//   await cn.execute("begin  end;", {
+//     p_user_id: {
+//       val: userId,
+//       dir: OracleDB.BIND_IN,
+//       type: OracleDB.NUMBER,
+//     },
+//     p_last_played: {
+//       val: lastPlayed,
+//       dir: OracleDB.BIND_IN,
+//       type: OracleDB.STRING,
+//       maxSize: 512,
+//     },
+//   });
+//   cn.close;
+// };

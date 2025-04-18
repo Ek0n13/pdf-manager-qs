@@ -32,14 +32,14 @@ declare global {
 
       dbAddUser: (name: User["NAME"]) => Promise<void>;
       dbDeleteUser: (id: User["ID"]) => Promise<boolean>;
-      dbGetUsers: () => Promise<User[]>;
+      dbGetUsers: () => Promise<User[] | undefined>;
       dbSaveLastPlayedAsync: (
         userId: UserLastPlayed["ID"],
         lastPlayed: UserLastPlayed["LAST_PLAYED"],
       ) => Promise<boolean>;
       dbGetUserLastPlayed: (
         id: UserLastPlayed["ID"],
-      ) => Promise<UserLastPlayed>;
+      ) => Promise<UserLastPlayed | undefined>;
     };
   }
 }

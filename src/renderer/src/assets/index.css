@@ -70,6 +70,7 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   font-size: 0.8em;
+  color: white;
   /* font-weight: 500; */
   /* transition: border-color 0.25s; */
 }

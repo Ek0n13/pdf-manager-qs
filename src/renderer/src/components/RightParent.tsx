@@ -50,8 +50,8 @@ function RightParent(props: { className: string }): JSX.Element {
   };
 
   const getUsers = async () => {
-    const getUsers: dbUser[] = await window.api.dbGetUsers();
-    setDbUserList(getUsers);
+    const getUsers = await window.api.dbGetUsers();
+    setDbUserList(getUsers ?? []);
   };
   const getUsersLoader = async () => {
     setLoading(true);
@@ -81,8 +81,11 @@ function RightParent(props: { className: string }): JSX.Element {
     event.preventDefault();
     setLoading(true);
 
-    const lastPlayed: dbUserLastPlayed =
-      await window.api.dbGetUserLastPlayed(userId);
+    const lastPlayed = await window.api.dbGetUserLastPlayed(userId);
+    if (!lastPlayed) {
+      setLoading(false);
+      return;
+    }
     setLastPlayed(lastPlayed.LAST_PLAYED);
     setCurrentUserId(userId);
 

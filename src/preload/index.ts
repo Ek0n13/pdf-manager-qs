@@ -35,13 +35,16 @@ const api = {
     ipcRenderer.invoke("db-add-user", name),
   dbDeleteUser: (id: User["ID"]): Promise<boolean> =>
     ipcRenderer.invoke("db-delete-user", id),
-  dbGetUsers: (): Promise<User[]> => ipcRenderer.invoke("db-get-users"),
+  dbGetUsers: (): Promise<User[] | undefined> =>
+    ipcRenderer.invoke("db-get-users"),
   dbSaveLastPlayedAsync: (
     userId: UserLastPlayed["ID"],
     lastPlayed: UserLastPlayed["LAST_PLAYED"],
   ): Promise<boolean> =>
     ipcRenderer.invoke("db-save-last-played-async", userId, lastPlayed),
-  dbGetUserLastPlayed: (id: UserLastPlayed["ID"]): Promise<UserLastPlayed> =>
+  dbGetUserLastPlayed: (
+    id: UserLastPlayed["ID"],
+  ): Promise<UserLastPlayed | undefined> =>
     ipcRenderer.invoke("db-get-user-last-played", id),
 };
 
