@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
-import { User, UserLastPlayed } from "../main/oracle-client.js";
+import { User, UserLastPlayed, FileBlobs } from "../main/oracle-client.js";
 
 // Custom APIs for renderer
 const api = {
@@ -46,6 +46,14 @@ const api = {
     id: UserLastPlayed["ID"],
   ): Promise<UserLastPlayed | undefined> =>
     ipcRenderer.invoke("db-get-user-last-played", id),
+  dbUploadFile: (
+    fileName: FileBlobs["FILE_NAME"],
+    blobData: FileBlobs["BLOB_DATA"],
+  ): Promise<void> => ipcRenderer.invoke("db-upload-file", fileName, blobData),
+  dbGetFileBlobData: (
+    fileName: FileBlobs["FILE_NAME"],
+  ): Promise<FileBlobs["BLOB_DATA"] | undefined> =>
+    ipcRenderer.invoke("db-get-file-blob-data", fileName),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

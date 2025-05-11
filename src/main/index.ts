@@ -238,7 +238,7 @@ app.whenReady().then(() => {
     "db-add-user",
     async (_event, name: db.User["NAME"]): Promise<void> => {
       try {
-        await db.addUser(name);
+        db.addUser(name);
       } catch (error) {
         throw new Error("Error adding user: " + error);
       }
@@ -249,7 +249,7 @@ app.whenReady().then(() => {
     "db-delete-user",
     async (_event, id: db.User["ID"]): Promise<boolean> => {
       try {
-        return await dbDeleteUser(id);
+        return dbDeleteUser(id);
       } catch (error) {
         throw new Error("Error deleting user: " + error);
       }
@@ -292,6 +292,35 @@ app.whenReady().then(() => {
         return dbGetUserLastPlayed(id);
       } catch (error) {
         throw new Error("Error getting users: " + error);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "db-upload-file",
+    async (
+      _event,
+      fileName: db.FileBlobs["FILE_NAME"],
+      blobData: db.FileBlobs["BLOB_DATA"],
+    ): Promise<void> => {
+      try {
+        db.uploadFile(fileName, blobData);
+      } catch (error) {
+        throw new Error("Error uploading file: " + error);
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "db-get-file-blob-data",
+    async (
+      _event,
+      fileName: db.FileBlobs["FILE_NAME"],
+    ): Promise<db.FileBlobs["BLOB_DATA"] | undefined> => {
+      try {
+        return db.getFileBlobData(fileName);
+      } catch (error) {
+        throw new Error("Error uploading file: " + error);
       }
     },
   );

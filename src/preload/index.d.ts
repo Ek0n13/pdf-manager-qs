@@ -1,6 +1,6 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
 import { youtube_v3 } from "googleapis";
-import { User, UserLastPlayed } from "../main/oracle-client.js";
+import { User, UserLastPlayed, FileBlobs } from "../main/oracle-client.js";
 
 declare global {
   type dbUser = User;
@@ -40,6 +40,13 @@ declare global {
       dbGetUserLastPlayed: (
         id: UserLastPlayed["ID"],
       ) => Promise<UserLastPlayed | undefined>;
+      dbUploadFile: (
+        fileName: FileBlobs["FILE_NAME"],
+        blobData: FileBlobs["BLOB_DATA"],
+      ) => Promise<void>;
+      dbGetFileBlobData: (
+        fileName: FileBlobs["FILE_NAME"],
+      ) => Promise<FileBlobs["BLOB_DATA"] | undefined>;
     };
   }
 }

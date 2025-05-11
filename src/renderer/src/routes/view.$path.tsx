@@ -1,6 +1,7 @@
 import { createFileRoute, Await, Link } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { youtube_v3 } from "googleapis";
+// import Loader from "@renderer/components/Loader";
 // import { youtubeDl } from "youtube-dl-exec";
 
 export const Route = createFileRoute("/view/$path")({
@@ -97,7 +98,7 @@ function ViewPdf(): JSX.Element {
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  });
+  }, []);
 
   const handleOpenFile = (
     event: React.MouseEvent<HTMLAnchorElement>,
@@ -256,6 +257,7 @@ function ViewPdf(): JSX.Element {
         >
           <i className="fa fa-xmark text-3xl px-1 border-solid border-4 border-black rounded-md shadow-sm shadow-black hover:border-red-600" />
         </Link>
+        {/* <Await promise={}></Await> */}
       </nav>
 
       {false && (

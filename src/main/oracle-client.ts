@@ -15,7 +15,7 @@ export type UserLastPlayed = {
 
 export type FileBlobs = {
   ID: number;
-  NAME: string;
+  FILE_NAME: string;
   BLOB_DATA: Blob;
 };
 
@@ -101,9 +101,10 @@ export const getUsers = async (): Promise<User[] | undefined> => {
 
   await cn.execute("ALTER SESSION SET RESULT_CACHE_MODE = MANUAL");
   const exec = await cn.execute("select t.* from table(api.get_users) t");
+  cn.close;
+
   const result = exec as OracleDB.Result<User>;
 
-  cn.close;
   return result.rows;
 };
 
@@ -150,32 +151,59 @@ export const getUserLastPlayed = async (
       },
     },
   );
+  cn.close;
+
   const result = exec as OracleDB.Result<UserLastPlayed>;
   const rr = result.rows ? result.rows[0] : result.rows;
 
-  cn.close;
   return rr;
 };
 
-// export const uploadFile = async (
-//   userId: UserLastPlayed["ID"],
-//   lastPlayed: UserLastPlayed["LAST_PLAYED"],
-// ) => {
-//   const cn = await oracleConnection();
-//   if (!cn) return;
+export const uploadFile = async (
+  fileName: FileBlobs["FILE_NAME"],
+  blobData: FileBlobs["BLOB_DATA"],
+) => {
+  const cn = await oracleConnection();
+  if (!cn) return;
 
-//   await cn.execute("begin  end;", {
-//     p_user_id: {
-//       val: userId,
-//       dir: OracleDB.BIND_IN,
-//       type: OracleDB.NUMBER,
-//     },
-//     p_last_played: {
-//       val: lastPlayed,
-//       dir: OracleDB.BIND_IN,
-//       type: OracleDB.STRING,
-//       maxSize: 512,
-//     },
-//   });
-//   cn.close;
-// };
+  await cn.execute("begin fs.upload_file(:p_file_name, :p_blob_data); end;", {
+    p_file_name: {
+      val: fileName,
+      dir: OracleDB.BIND_IN,
+      type: OracleDB.STRING,
+      maxSize: 512,
+    },
+    p_blob_data: {
+      val: blobData,
+      dir: OracleDB.BIND_IN,
+      type: OracleDB.BLOB,
+    },
+  });
+  cn.close;
+};
+
+export const getFileBlobData = async (
+  fileName: FileBlobs["FILE_NAME"],
+): Promise<FileBlobs["BLOB_DATA"] | undefined> => {
+  const cn = await oracleConnection();
+  if (!cn) return undefined;
+
+  const exec: OracleDB.Result<{ ret: unknown }> = await cn.execute(
+    "begin :ret := fs.get_file_blob_data(:p_file_name); end;",
+    {
+      p_file_name: {
+        val: fileName,
+        dir: OracleDB.BIND_IN,
+        type: OracleDB.STRING,
+        maxSize: 512,
+      },
+
+      ret: { dir: OracleDB.BIND_OUT, type: OracleDB.BLOB },
+    },
+  );
+  cn.close;
+
+  const result = exec.outBinds?.ret as FileBlobs["BLOB_DATA"] | undefined;
+
+  return result;
+};
