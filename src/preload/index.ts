@@ -31,6 +31,9 @@ const api = {
   youtubeSearchResults: (query: string) =>
     ipcRenderer.invoke("youtube-search-results", query),
 
+  // context menu
+  showContextMenu: () => ipcRenderer.send("show-context-menu"),
+
   dbAddUser: (name: User["NAME"]): Promise<void> =>
     ipcRenderer.invoke("db-add-user", name),
   dbDeleteUser: (id: User["ID"]): Promise<boolean> =>

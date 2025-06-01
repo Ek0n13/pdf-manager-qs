@@ -1,4 +1,12 @@
-import { app, shell, BrowserWindow, ipcMain, screen, dialog } from "electron";
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  screen,
+  dialog,
+  Menu,
+} from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join as pathJoin, parse as pathParse } from "path";
 import { exec } from "child_process";
@@ -231,6 +239,20 @@ app.whenReady().then(() => {
     } catch (error) {
       throw new Error("Error getting youtube search results: " + error);
     }
+  });
+
+  // pdf-list context menu
+  ipcMain.on("show-context-menu", (event) => {
+    const menu = Menu.buildFromTemplate([
+      {
+        label: "log something",
+        click: () => {
+          console.log("Right click");
+        },
+      },
+    ]);
+    const bw = BrowserWindow.fromWebContents(event.sender);
+    menu.popup({ window: bw ? bw : undefined });
   });
 
   // db related funcs

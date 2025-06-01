@@ -30,6 +30,9 @@ declare global {
         query: string,
       ) => Promise<Array<youtube_v3.Schema$Video> | undefined>;
 
+      // context menu
+      showContextMenu: () => void;
+
       dbAddUser: (name: User["NAME"]) => Promise<void>;
       dbDeleteUser: (id: User["ID"]) => Promise<boolean>;
       dbGetUsers: () => Promise<User[] | undefined>;

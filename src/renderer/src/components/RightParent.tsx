@@ -271,6 +271,13 @@ function PdfsList() {
     // }, 1000);
   };
 
+  // TODO
+  const handleContextMenu = (fileName: string) => {
+    // event.preventDefault();
+    console.log(fileName);
+    window.api.showContextMenu();
+  };
+
   const removeHighlight = () => {
     const highlightedElements = document.getElementsByClassName("highlight");
     if (highlightedElements.length === 0) return;
@@ -297,7 +304,12 @@ function PdfsList() {
               key={"open-" + index}
               className="mx-4 px-2 flex justify-between items-center text-black rounded-sm highlightable"
             >
-              <span className="overflow-ellipsis overflow-x-hidden whitespace-nowrap">
+              <span
+                className="overflow-ellipsis overflow-x-hidden whitespace-nowrap"
+                onContextMenu={() =>
+                  handleContextMenu(activeDirectory + "\\" + value)
+                }
+              >
                 {value}
               </span>
               <div className="pl-10 my-1 whitespace-nowrap">
