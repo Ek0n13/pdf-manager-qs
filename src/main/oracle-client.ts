@@ -48,18 +48,31 @@ async function oracleConnection(): Promise<OracleDB.Connection | null> {
   try {
     OracleDB.outFormat = OracleDB.OUT_FORMAT_OBJECT;
 
-    const walletPath: string = pathJoin(
-      __dirname,
-      `.${import.meta.env["VITE_ORACLE_WALLET_PATH"]}`,
-    );
+    // const walletPath: string = pathJoin(
+    //   __dirname,
+    //   `.${import.meta.env["VITE_ORACLE_WALLET_PATH"]}`,
+    // );
+    // const connection = await OracleDB.getConnection({
+    //   user: import.meta.env["VITE_ORACLE_USER"],
+    //   password: import.meta.env["VITE_ORACLE_PW"],
+    //   connectString: "sampledwdb19c_high",
+    //   configDir: walletPath,
+    //   walletLocation: walletPath,
+    //   walletPassword: import.meta.env["VITE_ORACLE_WALLET_PW"],
+    // });
+
+    const descriptor = `
+      (DESCRIPTION=
+        (ADDRESS=(PROTOCOL=TCP)(HOST=0.tcp.eu.ngrok.io)(PORT=17699))
+        (CONNECT_DATA=(SERVICE_NAME=FREEPDB1))
+      )
+    `;
     const connection = await OracleDB.getConnection({
-      user: import.meta.env["VITE_ORACLE_USER"],
-      password: import.meta.env["VITE_ORACLE_PW"],
-      connectString: "sampledwdb19c_high",
-      configDir: walletPath,
-      walletLocation: walletPath,
-      walletPassword: import.meta.env["VITE_ORACLE_WALLET_PW"],
+      user: import.meta.env["VITE_ORACLE_USR"],
+      password: import.meta.env["VITE_ORACLE_PWD"],
+      connectString: descriptor,
     });
+
     return connection;
   } catch (error) {
     throw new Error("Error connecting to database: " + error);
